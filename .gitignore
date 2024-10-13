@@ -9,6 +9,7 @@
 
 # Output of the Go coverage tool, specifically when used with LiteIDE
 *.out
+out/
 
 # Dependency directories (vendor/)
 vendor/
