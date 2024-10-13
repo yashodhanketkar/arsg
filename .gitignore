@@ -1,0 +1,46 @@
+# Binaries for programs and plugins
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Test binary
+*.test
+
+# Output of the Go coverage tool, specifically when used with LiteIDE
+*.out
+
+# Dependency directories (vendor/)
+vendor/
+
+# Go workspace
+go.work
+go.work.sum
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.temp
+
+# Coverage files
+coverage.out
+
+# Binary build output
+bin/
+build/
+
+# Go module and sum files (if managed outside of the project)
+go.sum
+go.mod
+
+# Windows related files
+Thumbs.db
+
+# macOS related files
+.DS_Store
+
+# Linux related files
+*.cgo1.go
+*.cgo2.c
