@@ -6,8 +6,9 @@ import (
 )
 
 func Assembly() [2]int {
-	fmt.Printf("Calculator %d\n", util.Calculator())
-	fmt.Printf("Input %d\n", util.Input())
+	parameters := util.GetParameters()
+	score, _ := util.Calculator(parameters)
+	fmt.Printf("Calculator %f\n", score)
 	return [2]int{0, 0}
 }
 
