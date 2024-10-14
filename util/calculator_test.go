@@ -43,7 +43,7 @@ func TestCalculator(t *testing.T) {
 	})
 
 	t.Run("should throw error", func(t *testing.T) {
-		_, err := Calculator(0, 0, 0, 0)
+		_, err := Calculator([4]int{0, 0, 0, 0})
 
 		if err == nil {
 			t.Error("should throw error")
@@ -53,18 +53,15 @@ func TestCalculator(t *testing.T) {
 	t.Run("should return correct scores", func(t *testing.T) {
 
 		calculatorTests := []struct {
-			art        int
-			plot       int
-			characters int
-			bias       int
+			parameters [4]int
 			want       float32
 		}{
-			{5, 6, 3, 1, 4.1},
-			{10, 10, 10, 10, 9.4},
+			{[4]int{5, 6, 3, 1}, 4.1},
+			{[4]int{10, 10, 10, 10}, 9.4},
 		}
 
 		for _, tt := range calculatorTests {
-			got, _ := Calculator(tt.art, tt.plot, tt.characters, tt.bias)
+			got, _ := Calculator(tt.parameters)
 
 			if got != tt.want {
 				t.Errorf("want %f, got %f", tt.want, got)

@@ -5,7 +5,7 @@ import (
 	"strconv"
 )
 
-func Input(valueType string) float32 {
+func Input(valueType string) int {
 	var userInput string
 
 	fmt.Printf("Enter %s score:\n", valueType)
@@ -16,5 +16,18 @@ func Input(valueType string) float32 {
 		return 0
 	}
 
-	return float32(value)
+	if value > 10.0 {
+		return 10
+	}
+
+	return int(value)
+}
+
+func GetParameters() [4]int {
+	art := Input("Art")
+	plot := Input("Plot")
+	characters := Input("Characters")
+	bias := Input("Bias")
+
+	return [4]int{art, plot, characters, bias}
 }
