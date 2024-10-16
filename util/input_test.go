@@ -8,7 +8,7 @@ import (
 func TestInput(t *testing.T) {
 
 	t.Run("should return 0", func(t *testing.T) {
-		want := 0
+		want := float32(0)
 		originalStdin := os.Stdin
 
 		defer func() { os.Stdin = originalStdin }()
@@ -24,7 +24,7 @@ func TestInput(t *testing.T) {
 	})
 
 	t.Run("should return 10", func(t *testing.T) {
-		want := 10
+		want := float32(10.0)
 		originalStdin := os.Stdin
 
 		defer func() { os.Stdin = originalStdin }()
@@ -40,7 +40,7 @@ func TestInput(t *testing.T) {
 	})
 
 	t.Run("should return correct result", func(t *testing.T) {
-		want := 3
+		want := float32(3.45)
 		originalStdin := os.Stdin
 
 		defer func() { os.Stdin = originalStdin }()
@@ -59,7 +59,7 @@ func TestInput(t *testing.T) {
 func TestGetParameters(t *testing.T) {
 	t.Run("should return [0, 0, 0, 0]", func(t *testing.T) {
 		got := GetParameters()
-		want := [4]int{0, 0, 0, 0}
+		want := [4]float32{0, 0, 0, 0}
 
 		if got != want {
 			t.Errorf("want %v, got %v", want, got)
@@ -67,7 +67,7 @@ func TestGetParameters(t *testing.T) {
 	})
 
 	t.Run("should return correct result", func(t *testing.T) {
-		want := [4]int{2, 4, 1, 9}
+		want := [4]float32{2.3, 4.2, 1.6, 9.2}
 		originalStdin := os.Stdin
 
 		defer func() { os.Stdin = originalStdin }()
