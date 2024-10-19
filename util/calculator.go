@@ -10,17 +10,20 @@ func rounder(score float32) float32 {
 }
 
 func adjuster(score float32) float32 {
-	return rounder((score / 10) * 9.4)
+	adjusted_score := rounder((score / 10) * 9.4)
+	converted_score := SystemCalculator("DecimalSystem", adjusted_score)
+
+	return converted_score
 }
 
-func Calculator(parameters [4]int) (float32, error) {
+func Calculator(parameters [4]float32) (float32, error) {
 
 	art := parameters[0]
 	plot := parameters[1]
 	characters := parameters[2]
 	bias := parameters[3]
 
-	if art == 0 || plot == 0 || characters == 0 || bias == 0 {
+	if art == 0 && plot == 0 && characters == 0 && bias == 0 {
 		return 0, errors.New("Invalid input")
 	}
 

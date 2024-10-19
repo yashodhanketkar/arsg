@@ -12,6 +12,7 @@ func TestCalculator(t *testing.T) {
 		}{
 			{10.0, 9.4},
 			{6.7, 6.3},
+			{0, 0.1},
 		}
 
 		for _, tt := range adjusterTests {
@@ -43,7 +44,7 @@ func TestCalculator(t *testing.T) {
 	})
 
 	t.Run("should throw error", func(t *testing.T) {
-		_, err := Calculator([4]int{0, 0, 0, 0})
+		_, err := Calculator([4]float32{0, 0, 0, 0})
 
 		if err == nil {
 			t.Error("should throw error")
@@ -53,11 +54,11 @@ func TestCalculator(t *testing.T) {
 	t.Run("should return correct scores", func(t *testing.T) {
 
 		calculatorTests := []struct {
-			parameters [4]int
+			parameters [4]float32
 			want       float32
 		}{
-			{[4]int{5, 6, 3, 1}, 4.1},
-			{[4]int{10, 10, 10, 10}, 9.4},
+			{[4]float32{5, 6, 3, 1}, 4.1},
+			{[4]float32{10, 10, 10, 10}, 9.4},
 		}
 
 		for _, tt := range calculatorTests {
