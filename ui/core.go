@@ -2,34 +2,19 @@ package ui
 
 import (
 	"fmt"
-	"os"
 	"strings"
 
 	"github.com/charmbracelet/bubbles/cursor"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
-)
-
-var (
-	focusedStyle        = lipgloss.NewStyle().Foreground(lipgloss.Color("205"))
-	blurredStyle        = lipgloss.NewStyle().Foreground(lipgloss.Color("240"))
-	cursorStyle         = focusedStyle
-	noStyle             = lipgloss.NewStyle()
-	helpStyle           = blurredStyle
-	cursorModeHelpStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("244"))
-
-	focusedButton = focusedStyle.Render("[ End ]")
-	blurredButton = fmt.Sprintf("[ %s ]", blurredStyle.Render("End"))
-
-	focusedButtonAlt = focusedStyle.Render("[ Restart ]")
-	blurredButtonAlt = fmt.Sprintf("[ %s ]", blurredStyle.Render("Restart"))
+	// "github.com/yashodhanketkar/arsg/util"
 )
 
 type model struct {
 	focusIndex int
 	inputs     []textinput.Model
 	cursorMode cursor.Mode
+	score      float32
 }
 
 func initialModel() model {
@@ -80,8 +65,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		case "r":
 			m.resetInputs()
-			// m.focusIndex = 0
-			// m.inputs[0].Focus()
 			return m, nil
 
 		// Change cursor mode
@@ -97,7 +80,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Batch(cmds...)
 
 		// Set focus to next input
-		case "tab", "shift+tab", "enter", "up", "down":
+		case "tab", "shift+tab", "enter", "up", "down", "j", "k":
 			s := msg.String()
 
 			if s == "enter" && m.focusIndex == len(m.inputs) {
@@ -110,7 +93,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 
 			// Cycle indexes
-			if s == "up" || s == "shift+tab" {
+			if s == "up" || s == "shift+tab" || s == "k" {
 				m.focusIndex--
 			} else {
 				m.focusIndex++
@@ -128,54 +111,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	// Handle character input and blinking
 	cmd := m.updateInputs(msg)
+	m.calculateScore()
 
 	return m, cmd
-}
-
-func (m *model) setFocus(index int) (tea.Model, tea.Cmd) {
-	cmds := make([]tea.Cmd, len(m.inputs))
-	for i := 0; i <= len(m.inputs)-1; i++ {
-		if i == index {
-			// Set focused state
-			cmds[i] = m.inputs[i].Focus()
-			m.inputs[i].PromptStyle = focusedStyle
-			m.inputs[i].TextStyle = focusedStyle
-			continue
-		}
-		// Remove focused state
-		m.inputs[i].Blur()
-		m.inputs[i].PromptStyle = noStyle
-		m.inputs[i].TextStyle = noStyle
-	}
-
-	return m, tea.Batch(cmds...)
-}
-
-func (m *model) resetInputs() tea.Cmd {
-	cmds := make([]tea.Cmd, len(m.inputs))
-
-	for i := range m.inputs {
-		m.inputs[i].Reset()
-		m.inputs[i].Blur()
-		m.inputs[i].PromptStyle = noStyle
-		m.inputs[i].TextStyle = noStyle
-	}
-
-	m.focusIndex = 0
-	m.setFocus(m.focusIndex)
-
-	return tea.Batch(cmds...)
-}
-
-func (m *model) updateInputs(msg tea.Msg) tea.Cmd {
-	cmds := make([]tea.Cmd, len(m.inputs))
-
-	for i := range m.inputs {
-		m.inputs[i], cmds[i] = m.inputs[i].Update(msg)
-		m.inputs[i].SetValue(numericInput(m.inputs[i].Value()))
-	}
-
-	return tea.Batch(cmds...)
 }
 
 func (m model) View() string {
@@ -199,6 +137,7 @@ func (m model) View() string {
 		endButton = &focusedButton
 	}
 
+	fmt.Fprintf(&b, "\n\nRating: %.1f\n", m.score)
 	fmt.Fprintf(&b, "\n\n%s\n", *restartButton)
 	fmt.Fprintf(&b, "%s\n", *endButton)
 
@@ -207,11 +146,4 @@ func (m model) View() string {
 	b.WriteString(helpStyle.Render(" (ctrl+r to change style)"))
 
 	return b.String()
-}
-
-func TeaUI() {
-	if _, err := tea.NewProgram(initialModel()).Run(); err != nil {
-		fmt.Printf("could not start program: %s\n", err)
-		os.Exit(1)
-	}
 }
