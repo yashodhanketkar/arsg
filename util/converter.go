@@ -1,7 +1,6 @@
 package util
 
 import (
-	"fmt"
 	"math"
 )
 
@@ -30,8 +29,6 @@ func SystemCalculator(systemType string, score float32) float32 {
 		}
 		converted_score = float32(int(score * 10))
 	}
-
-	fmt.Printf("Debug 1: Score is %f\n", converted_score)
 
 	return converted_score
 }
