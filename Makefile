@@ -6,6 +6,10 @@ test:
 run:
 	@go run main/main.go
 
+build:
+	@go build main/main.go
+
+
 commit: add
 	@git commit
 

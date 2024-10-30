@@ -11,10 +11,6 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-const (
-	qlo = "Hola"
-)
-
 var (
 	focusedStyle        = lipgloss.NewStyle().Foreground(lipgloss.Color("205"))
 	blurredStyle        = lipgloss.NewStyle().Foreground(lipgloss.Color("240"))
@@ -53,15 +49,16 @@ func initialModel() model {
 			t.Focus()
 			t.PromptStyle = focusedStyle
 			t.TextStyle = focusedStyle
-			t.CharLimit = 3
+			t.CharLimit = 5
 		case 1:
 			t.Placeholder = "Character"
-			t.CharLimit = 3
+			t.CharLimit = 5
 		case 2:
 			t.Placeholder = "Plot"
+			t.CharLimit = 5
 		case 3:
 			t.Placeholder = "Bias"
-			t.CharLimit = 3
+			t.CharLimit = 5
 		}
 
 		m.inputs[i] = t
@@ -78,8 +75,14 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
-		case "ctrl+c", "esc", "delete":
+		case "ctrl+c", "esc", "q":
 			return m, tea.Quit
+
+		case "r":
+			m.resetInputs()
+			// m.focusIndex = 0
+			// m.inputs[0].Focus()
+			return m, nil
 
 		// Change cursor mode
 		case "ctrl+r":
@@ -99,9 +102,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 			if s == "enter" && m.focusIndex == len(m.inputs) {
 				m.resetInputs()
-				m.focusIndex++
-				m.focusIndex++
-				tea.ClearScreen()
+				return m, nil
 			}
 
 			if s == "enter" && m.focusIndex == len(m.inputs)+1 {
@@ -121,22 +122,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.focusIndex = len(m.inputs) + 1
 			}
 
-			cmds := make([]tea.Cmd, len(m.inputs))
-			for i := 0; i <= len(m.inputs)-1; i++ {
-				if i == m.focusIndex {
-					// Set focused state
-					cmds[i] = m.inputs[i].Focus()
-					m.inputs[i].PromptStyle = focusedStyle
-					m.inputs[i].TextStyle = focusedStyle
-					continue
-				}
-				// Remove focused state
-				m.inputs[i].Blur()
-				m.inputs[i].PromptStyle = noStyle
-				m.inputs[i].TextStyle = noStyle
-			}
-
-			return m, tea.Batch(cmds...)
+			return m.setFocus(m.focusIndex)
 		}
 	}
 
@@ -146,12 +132,37 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, cmd
 }
 
+func (m *model) setFocus(index int) (tea.Model, tea.Cmd) {
+	cmds := make([]tea.Cmd, len(m.inputs))
+	for i := 0; i <= len(m.inputs)-1; i++ {
+		if i == index {
+			// Set focused state
+			cmds[i] = m.inputs[i].Focus()
+			m.inputs[i].PromptStyle = focusedStyle
+			m.inputs[i].TextStyle = focusedStyle
+			continue
+		}
+		// Remove focused state
+		m.inputs[i].Blur()
+		m.inputs[i].PromptStyle = noStyle
+		m.inputs[i].TextStyle = noStyle
+	}
+
+	return m, tea.Batch(cmds...)
+}
+
 func (m *model) resetInputs() tea.Cmd {
 	cmds := make([]tea.Cmd, len(m.inputs))
 
 	for i := range m.inputs {
 		m.inputs[i].Reset()
+		m.inputs[i].Blur()
+		m.inputs[i].PromptStyle = noStyle
+		m.inputs[i].TextStyle = noStyle
 	}
+
+	m.focusIndex = 0
+	m.setFocus(m.focusIndex)
 
 	return tea.Batch(cmds...)
 }
@@ -159,10 +170,9 @@ func (m *model) resetInputs() tea.Cmd {
 func (m *model) updateInputs(msg tea.Msg) tea.Cmd {
 	cmds := make([]tea.Cmd, len(m.inputs))
 
-	// Only text inputs with Focus() set will respond, so it's safe to simply
-	// update all of them here without any further logic.
 	for i := range m.inputs {
 		m.inputs[i], cmds[i] = m.inputs[i].Update(msg)
+		m.inputs[i].SetValue(numericInput(m.inputs[i].Value()))
 	}
 
 	return tea.Batch(cmds...)
