@@ -12,7 +12,7 @@ func TestCalculator(t *testing.T) {
 		}{
 			{10.0, 9.4},
 			{6.7, 6.3},
-			{0, 0.1},
+			{0, 0.0},
 		}
 
 		for _, tt := range adjusterTests {

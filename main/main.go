@@ -16,7 +16,7 @@ func mainLoop() []float32 {
 		parameters := util.GetParameters()
 
 		if score, err := util.Calculator(parameters); err == nil {
-			res = append(res, score)
+			res = append(res, util.SystemCalculator("DecimalSystem", score))
 			fmt.Printf("Generated rating for this item is %v\n", score)
 		}
 		fmt.Println("To continue enter y/Y")
@@ -28,5 +28,4 @@ func mainLoop() []float32 {
 
 func main() {
 	ui.TeaUI()
-	// mainLoop()
 }

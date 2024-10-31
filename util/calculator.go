@@ -11,9 +11,7 @@ func rounder(score float32) float32 {
 
 func adjuster(score float32) float32 {
 	adjusted_score := rounder((score / 10) * 9.4)
-	converted_score := SystemCalculator("DecimalSystem", adjusted_score)
-
-	return converted_score
+	return adjusted_score
 }
 
 func Calculator(parameters [4]float32) (float32, error) {
