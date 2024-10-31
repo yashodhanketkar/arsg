@@ -24,6 +24,13 @@ var (
 
 	focusedButtonAlt = focusedStyle.Render("[ Restart ]")
 	blurredButtonAlt = fmt.Sprintf("[ %s ]", blurredStyle.Render("Restart"))
+
+	scoreSystem = map[int]string{
+		0: "DecimalSystem",
+		1: "IntegerSystem",
+		2: "FivePointSystem",
+		3: "PercentageSystem",
+	}
 )
 
 func (m *model) setFocus(index int) (tea.Model, tea.Cmd) {
@@ -91,7 +98,11 @@ func (m *model) calculateScore() {
 
 	for i := range m.inputs {
 		if val, err := strconv.ParseFloat(m.inputs[i].Value(), 32); err == nil {
-			parameters[i] = float32(val)
+			if val > 10.0 {
+				parameters[i] = float32(10)
+			} else {
+				parameters[i] = float32(val)
+			}
 		} else {
 			allValid = false
 		}
@@ -99,7 +110,7 @@ func (m *model) calculateScore() {
 
 	if allValid {
 		if score, err := util.Calculator(parameters); err == nil {
-			m.score = score
+			m.score = util.SystemCalculator(scoreSystem[m.scoreMode], score)
 		} else {
 			m.score = 0
 		}
