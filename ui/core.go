@@ -7,13 +7,13 @@ import (
 	"github.com/charmbracelet/bubbles/cursor"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
-	// "github.com/yashodhanketkar/arsg/util"
 )
 
 type model struct {
 	focusIndex int
 	inputs     []textinput.Model
 	cursorMode cursor.Mode
+	scoreMode  int
 	score      float32
 }
 
@@ -21,6 +21,8 @@ func initialModel() model {
 	m := model{
 		inputs: make([]textinput.Model, 4),
 	}
+
+	m.scoreMode = 0
 
 	var t textinput.Model
 	for i := range m.inputs {
@@ -78,6 +80,12 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				cmds[i] = m.inputs[i].Cursor.SetMode(m.cursorMode)
 			}
 			return m, tea.Batch(cmds...)
+
+		case "ctrl+s":
+			m.scoreMode++
+			if m.scoreMode > 3 {
+				m.scoreMode = 0
+			}
 
 		// Set focus to next input
 		case "tab", "shift+tab", "enter", "up", "down", "j", "k":
@@ -144,6 +152,10 @@ func (m model) View() string {
 	b.WriteString(helpStyle.Render("cursor mode is "))
 	b.WriteString(cursorModeHelpStyle.Render(m.cursorMode.String()))
 	b.WriteString(helpStyle.Render(" (ctrl+r to change style)"))
+
+	b.WriteString(helpStyle.Render("\nscore mode is "))
+	b.WriteString(cursorModeHelpStyle.Render(scoreSystem[m.scoreMode]))
+	b.WriteString(helpStyle.Render(" (ctrl+s to change score system)"))
 
 	return b.String()
 }
