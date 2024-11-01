@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/atotto/clipboard"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/yashodhanketkar/arsg/util"
 
@@ -117,4 +118,8 @@ func (m *model) calculateScore() {
 	} else {
 		m.score = 0
 	}
+}
+
+func (m *model) scoreToClipboard() {
+	clipboard.WriteAll(fmt.Sprintf("%.1f", m.score))
 }
