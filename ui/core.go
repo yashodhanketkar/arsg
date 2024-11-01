@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/charmbracelet/bubbles/cursor"
+	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 )
@@ -15,6 +16,8 @@ type model struct {
 	cursorMode cursor.Mode
 	scoreMode  int
 	score      float32
+	help       help.Model
+	keys       KeyMap
 }
 
 func initialModel() model {
@@ -23,6 +26,8 @@ func initialModel() model {
 	}
 
 	m.scoreMode = 0
+	m.keys = keys
+	m.help = help.New()
 
 	var t textinput.Model
 	for i := range m.inputs {
@@ -69,6 +74,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "c":
 			m.scoreToClipboard()
 			return m, nil
+
+		case "?":
+			m.help.ShowAll = !m.help.ShowAll
 
 		// reset focused input
 		case "r":
@@ -139,6 +147,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m model) View() string {
 	var b strings.Builder
+	helpView := m.help.View(m.keys)
 
 	for i := range m.inputs {
 		b.WriteString(m.inputs[i].View())
@@ -171,6 +180,9 @@ func (m model) View() string {
 	b.WriteString(helpStyle.Render("\nscore mode is "))
 	b.WriteString(cursorModeHelpStyle.Render(scoreSystem[m.scoreMode]))
 	b.WriteString(helpStyle.Render(" (ctrl+s to change score system)"))
+
+	b.WriteString(helpStyle.Render("\n"))
+	b.WriteString(keymapStyle.Render(helpView))
 
 	return b.String()
 }
