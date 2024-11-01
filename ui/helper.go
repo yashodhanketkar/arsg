@@ -20,6 +20,13 @@ var (
 	helpStyle           = blurredStyle
 	cursorModeHelpStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("244"))
 
+	resultStyle = lipgloss.NewStyle().
+			Foreground(lipgloss.Color("120")).
+			Background(lipgloss.Color("240")).Padding(0, 1).Bold(true)
+
+	keymapStyle = lipgloss.NewStyle().
+			Border(lipgloss.RoundedBorder()).Padding(0, 1)
+
 	focusedButton = focusedStyle.Render("[ End ]")
 	blurredButton = fmt.Sprintf("[ %s ]", blurredStyle.Render("End"))
 
