@@ -32,13 +32,13 @@ func initialModel() model {
 
 		switch i {
 		case 0:
-			t.Placeholder = "Art"
+			t.Placeholder = "Art/Animation"
 			t.Focus()
 			t.PromptStyle = focusedStyle
 			t.TextStyle = focusedStyle
 			t.CharLimit = 5
 		case 1:
-			t.Placeholder = "Character"
+			t.Placeholder = "Character/Cast"
 			t.CharLimit = 5
 		case 2:
 			t.Placeholder = "Plot"
@@ -62,10 +62,21 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
-		case "ctrl+c", "esc", "q":
+		case "ctrl+c", "q":
 			return m, tea.Quit
 
+		// copy score to clipboard
+		case "c":
+			m.scoreToClipboard()
+			return m, nil
+
+		// reset focused input
 		case "r":
+			m.inputs[m.focusIndex].Reset()
+			return m, nil
+
+		// reset all inputs
+		case "esc":
 			m.resetInputs()
 			return m, nil
 
