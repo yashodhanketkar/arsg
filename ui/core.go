@@ -72,7 +72,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		// reset focused input
 		case "r":
-			m.inputs[m.focusIndex].Reset()
+			if 0 <= m.focusIndex && m.focusIndex <= 3 {
+				m.inputs[m.focusIndex].Reset()
+			}
 			return m, nil
 
 		// reset all inputs
@@ -156,9 +158,11 @@ func (m model) View() string {
 		endButton = &focusedButton
 	}
 
-	fmt.Fprintf(&b, "\n\nRating: %.1f\n", m.score)
+	b.WriteString("\n\nRating: ")
+	b.WriteString(resultStyle.Render(fmt.Sprintf("%.1f", m.score)))
+
 	fmt.Fprintf(&b, "\n\n%s\n", *restartButton)
-	fmt.Fprintf(&b, "%s\n", *endButton)
+	fmt.Fprintf(&b, "%s\n\n", *endButton)
 
 	b.WriteString(helpStyle.Render("cursor mode is "))
 	b.WriteString(cursorModeHelpStyle.Render(m.cursorMode.String()))
