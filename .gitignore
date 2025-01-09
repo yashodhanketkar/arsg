@@ -32,10 +32,6 @@ coverage.out
 bin/
 build/
 
-# Go module and sum files (if managed outside of the project)
-go.sum
-go.mod
-
 # Windows related files
 Thumbs.db
 
