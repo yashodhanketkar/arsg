@@ -179,7 +179,7 @@ func (m model) View() string {
 
 	b.WriteString(helpStyle.Render("\nscore mode is "))
 	b.WriteString(cursorModeHelpStyle.Render(scoreSystem[m.scoreMode]))
-	b.WriteString(helpStyle.Render(" (ctrl+s to change score system)"))
+	b.WriteString(helpStyle.Render(" system (ctrl+s to change score system)"))
 
 	b.WriteString(helpStyle.Render("\n"))
 	b.WriteString(keymapStyle.Render(helpView))

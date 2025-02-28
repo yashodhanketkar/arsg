@@ -8,22 +8,22 @@ func SystemCalculator(systemType string, score float32) float32 {
 	var converted_score float32
 
 	switch systemType {
-	case "DecimalSystem":
+	case "Decimal":
 		if score < 0.1 {
 			return 0.1
 		}
 		converted_score = score
-	case "IntegerSystem":
+	case "Integer":
 		if score < 1 {
 			return 1
 		}
 		converted_score = float32(int(score))
-	case "FivePointSystem":
+	case "FivePoint":
 		if score < 1 {
 			return 1
 		}
 		converted_score = float32(math.Ceil(float64(score) * 0.5))
-	case "PercentageSystem":
+	case "Percentage":
 		if score < 1 {
 			return 1
 		}

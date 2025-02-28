@@ -11,6 +11,9 @@ run:
 start:
 	@./build/${PROJECT_NAME}
 
+startclean: build
+	@./build/${PROJECT_NAME}
+
 build: test clean 
 	@go build -o ./build/${PROJECT_NAME} ./main/main.go
 
