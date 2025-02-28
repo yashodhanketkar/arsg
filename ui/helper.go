@@ -34,10 +34,10 @@ var (
 	blurredButtonAlt = fmt.Sprintf("[ %s ]", blurredStyle.Render("Restart"))
 
 	scoreSystem = map[int]string{
-		0: "DecimalSystem",
-		1: "IntegerSystem",
-		2: "FivePointSystem",
-		3: "PercentageSystem",
+		0: "Decimal",
+		1: "Integer",
+		2: "FivePoint",
+		3: "Percentage",
 	}
 )
 
