@@ -2,12 +2,14 @@ package ui
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/charmbracelet/bubbles/cursor"
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/yashodhanketkar/arsg/db"
 )
 
 type model struct {
@@ -73,9 +75,44 @@ func (m model) isNumeric() bool {
 	return m.focusIndex != 0 && m.focusIndex != 5
 }
 
+func (m model) prepareRating() db.Rating {
+
+	parseFloat := func(value string) float32 {
+		f, err := strconv.ParseFloat(value, 64)
+		if err != nil {
+			return 0
+		}
+		pf := float32(f)
+
+		// clamp values
+		if pf < 0.0 {
+			pf = 0.0
+		} else if pf > 10.0 {
+			pf = 10.0
+		}
+
+		return pf
+	}
+
+	return db.Rating{
+		Name:     m.inputs[0].Value(),
+		Art:      parseFloat(m.inputs[1].Value()),
+		Support:  parseFloat(m.inputs[2].Value()),
+		Plot:     parseFloat(m.inputs[3].Value()),
+		Bias:     parseFloat(m.inputs[4].Value()),
+		Comments: m.inputs[5].Value(),
+	}
+}
+
 func (m model) buttonCommands() (tea.Model, tea.Cmd) {
 	l := len(m.inputs)
 	switch m.focusIndex {
+	case l:
+		DB := db.ConnectDB()
+		defer DB.Close()
+		db.AddRatings(DB, m.prepareRating())
+		m.resetInputs()
+		return m, nil
 
 	case l + 1:
 		m.resetInputs()
