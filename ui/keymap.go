@@ -12,6 +12,8 @@ type KeyMap struct {
 	StartOver key.Binding
 	Help      key.Binding
 	Copy      key.Binding
+	Home      key.Binding
+	End       key.Binding
 }
 
 func (k KeyMap) ShortHelp() []key.Binding {
@@ -20,39 +22,47 @@ func (k KeyMap) ShortHelp() []key.Binding {
 
 func (k KeyMap) FullHelp() [][]key.Binding {
 	return [][]key.Binding{
-		{k.Up, k.Down, k.Copy},
-		{k.Quit, k.Reset, k.StartOver},
-		{k.Help},
+		{k.Help, k.Up, k.Down},
+		{k.Quit, k.Copy, k.Reset},
+		{k.StartOver, k.Home, k.End},
 	}
 }
 
 var keys = KeyMap{
 	Up: key.NewBinding(
-		key.WithKeys("up", "k"),
-		key.WithHelp("↑/k", "move up"),
+		key.WithKeys("pgup", "up"),
+		key.WithHelp("↑/PU", "move up"),
 	),
 	Down: key.NewBinding(
-		key.WithKeys("down", "j"),
-		key.WithHelp("↓/j", "move down"),
+		key.WithKeys("pgdown", "Down"),
+		key.WithHelp("↓/PD", "move down"),
 	),
 	Quit: key.NewBinding(
 		key.WithKeys("q"),
 		key.WithHelp("q", "quit"),
 	),
 	Reset: key.NewBinding(
-		key.WithKeys("r"),
-		key.WithHelp("r", "reset field"),
+		key.WithKeys("del"),
+		key.WithHelp("del", "reset field"),
 	),
 	StartOver: key.NewBinding(
 		key.WithKeys("esc"),
 		key.WithHelp("esc", "start over"),
 	),
 	Help: key.NewBinding(
-		key.WithKeys("?"),
-		key.WithHelp("?", "toggle help"),
+		key.WithKeys("F1"),
+		key.WithHelp("F1", "toggle help"),
 	),
 	Copy: key.NewBinding(
 		key.WithKeys("c"),
 		key.WithHelp("c", "copy rating"),
+	),
+	Home: key.NewBinding(
+		key.WithKeys("home"),
+		key.WithHelp("home", "go to start"),
+	),
+	End: key.NewBinding(
+		key.WithKeys("end"),
+		key.WithHelp("end", "go to end"),
 	),
 }

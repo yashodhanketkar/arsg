@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 
+	"github.com/yashodhanketkar/arsg/db"
 	"github.com/yashodhanketkar/arsg/ui"
 	"github.com/yashodhanketkar/arsg/util"
 )
@@ -27,5 +28,6 @@ func mainLoop() []float32 {
 }
 
 func main() {
+	db.InitiDB()
 	ui.TeaUI()
 }

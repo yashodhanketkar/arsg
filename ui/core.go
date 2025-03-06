@@ -2,12 +2,14 @@ package ui
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/charmbracelet/bubbles/cursor"
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/yashodhanketkar/arsg/db"
 )
 
 type model struct {
@@ -22,7 +24,7 @@ type model struct {
 
 func initialModel() model {
 	m := model{
-		inputs: make([]textinput.Model, 4),
+		inputs: make([]textinput.Model, 6),
 	}
 
 	m.scoreMode = 0
@@ -31,26 +33,32 @@ func initialModel() model {
 
 	var t textinput.Model
 	for i := range m.inputs {
+
 		t = textinput.New()
 		t.Cursor.Style = cursorStyle
 		t.CharLimit = 32
 
 		switch i {
 		case 0:
-			t.Placeholder = "Art/Animation"
+			t.Placeholder = "Name"
 			t.Focus()
 			t.PromptStyle = focusedStyle
 			t.TextStyle = focusedStyle
-			t.CharLimit = 5
 		case 1:
-			t.Placeholder = "Character/Cast"
+			t.Placeholder = "Art/Animation"
 			t.CharLimit = 5
 		case 2:
-			t.Placeholder = "Plot"
+			t.Placeholder = "Character/Cast"
 			t.CharLimit = 5
 		case 3:
+			t.Placeholder = "Plot"
+			t.CharLimit = 5
+		case 4:
 			t.Placeholder = "Bias"
 			t.CharLimit = 5
+		case 5:
+			t.Placeholder = "Comments"
+			t.CharLimit = 128
 		}
 
 		m.inputs[i] = t
@@ -63,26 +71,97 @@ func (m model) Init() tea.Cmd {
 	return tea.Batch(tea.EnterAltScreen, textinput.Blink)
 }
 
+func (m model) isNumeric() bool {
+	return m.focusIndex != 0 && m.focusIndex != 5
+}
+
+func (m model) prepareRating() db.Rating {
+
+	parseFloat := func(value string) float32 {
+		f, err := strconv.ParseFloat(value, 64)
+		if err != nil {
+			return 0
+		}
+		pf := float32(f)
+
+		// clamp values
+		if pf < 0.0 {
+			pf = 0.0
+		} else if pf > 10.0 {
+			pf = 10.0
+		}
+
+		return pf
+	}
+
+	return db.Rating{
+		Name:     m.inputs[0].Value(),
+		Art:      parseFloat(m.inputs[1].Value()),
+		Support:  parseFloat(m.inputs[2].Value()),
+		Plot:     parseFloat(m.inputs[3].Value()),
+		Bias:     parseFloat(m.inputs[4].Value()),
+		Comments: m.inputs[5].Value(),
+	}
+}
+
+func (m model) buttonCommands() (tea.Model, tea.Cmd) {
+	l := len(m.inputs)
+	switch m.focusIndex {
+	case l:
+		DB := db.ConnectDB()
+		defer DB.Close()
+		db.AddRatings(DB, m.prepareRating())
+		m.resetInputs()
+		return m, nil
+
+	case l + 1:
+		m.resetInputs()
+		return m, nil
+
+	case l + 2:
+		return m, tea.Quit
+	}
+	return m, nil
+}
+
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
-		case "ctrl+c", "q":
+		case "ctrl+c":
+			return m, tea.Batch(tea.ExitAltScreen, tea.Quit)
+
+		case "home":
+			m.focusIndex = 0
+			return m.setFocus(m.focusIndex)
+
+		case "end":
+			m.focusIndex = len(m.inputs) + 2
+			return m.setFocus(m.focusIndex)
+
+		case "q":
+			if !m.isNumeric() {
+				break
+			}
 			return m, tea.Batch(tea.ExitAltScreen, tea.Quit)
 
 		// copy score to clipboard
 		case "c":
+			if !m.isNumeric() {
+				break
+			}
 			m.scoreToClipboard()
 			return m, nil
 
-		case "?":
+		case "f1":
 			m.help.ShowAll = !m.help.ShowAll
 
 		// reset focused input
-		case "r":
-			if 0 <= m.focusIndex && m.focusIndex <= 3 {
-				m.inputs[m.focusIndex].Reset()
+		case "delete":
+			if m.focusIndex > len(m.inputs)-1 {
+				break
 			}
+			m.inputs[m.focusIndex].Reset()
 			return m, nil
 
 		// reset all inputs
@@ -109,29 +188,36 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 
 		// Set focus to next input
-		case "tab", "shift+tab", "enter", "up", "down", "j", "k":
+		case " ", "tab", "shift+tab", "enter", "down", "pgdown", "up", "pgup":
 			s := msg.String()
 
-			if s == "enter" && m.focusIndex == len(m.inputs) {
-				m.resetInputs()
-				return m, nil
+			if s == " " {
+				if m.focusIndex != 0 && m.focusIndex != 5 {
+					return m.buttonCommands()
+				} else {
+					break
+				}
 			}
 
-			if s == "enter" && m.focusIndex == len(m.inputs)+1 {
-				return m, tea.Quit
+			if s == "enter" {
+				return m.buttonCommands()
 			}
 
 			// Cycle indexes
-			if s == "up" || s == "shift+tab" || s == "k" {
-				m.focusIndex--
-			} else {
+			if s == "tab" || s == "down" || s == "pgdown" {
 				m.focusIndex++
 			}
 
-			if m.focusIndex > len(m.inputs)+1 {
+			// Cycle indexes reverse
+			if s == "shift+tab" || s == "up" || s == "pgup" {
+				m.focusIndex--
+			}
+
+			// handle focus and styles
+			if m.focusIndex > len(m.inputs)+2 {
 				m.focusIndex = 0
 			} else if m.focusIndex < 0 {
-				m.focusIndex = len(m.inputs) + 1
+				m.focusIndex = len(m.inputs) + 2
 			}
 
 			return m.setFocus(m.focusIndex)
@@ -156,21 +242,27 @@ func (m model) View() string {
 		}
 	}
 
-	restartButton := &blurredButtonAlt
-	endButton := &blurredButton
+	saveButton := &blurredButtonSv
+	restartButton := &blurredButtonRes
+	endButton := &blurredButtonEnd
 
 	if m.focusIndex == len(m.inputs) {
-		restartButton = &focusedButtonAlt
+		saveButton = &focusedButtonSv
 	}
 
 	if m.focusIndex == len(m.inputs)+1 {
-		endButton = &focusedButton
+		restartButton = &focusedButtonRes
+	}
+
+	if m.focusIndex == len(m.inputs)+2 {
+		endButton = &focusedButtonEnd
 	}
 
 	b.WriteString("\n\nRating: ")
 	b.WriteString(resultStyle.Render(fmt.Sprintf("%.1f", m.score)))
 
-	fmt.Fprintf(&b, "\n\n%s\n", *restartButton)
+	fmt.Fprintf(&b, "\n\n%s\n", *saveButton)
+	fmt.Fprintf(&b, "%s\n", *restartButton)
 	fmt.Fprintf(&b, "%s\n\n", *endButton)
 
 	b.WriteString(helpStyle.Render("cursor mode is "))
@@ -183,6 +275,10 @@ func (m model) View() string {
 
 	b.WriteString(helpStyle.Render("\n"))
 	b.WriteString(keymapStyle.Render(helpView))
+	b.WriteString(helpStyle.Render("\n"))
+	b.WriteString(
+		helpStyle.Render("Some shortcut keys won't work in name and comments fields. (c, q, r)"),
+	)
 
 	return b.String()
 }

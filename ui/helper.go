@@ -27,11 +27,14 @@ var (
 	keymapStyle = lipgloss.NewStyle().
 			Border(lipgloss.RoundedBorder()).Padding(0, 1)
 
-	focusedButton = focusedStyle.Render("[ End ]")
-	blurredButton = fmt.Sprintf("[ %s ]", blurredStyle.Render("End"))
+	focusedButtonSv = focusedStyle.Render("[ Save ]")
+	blurredButtonSv = fmt.Sprintf("[ %s ]", blurredStyle.Render("Save"))
 
-	focusedButtonAlt = focusedStyle.Render("[ Restart ]")
-	blurredButtonAlt = fmt.Sprintf("[ %s ]", blurredStyle.Render("Restart"))
+	focusedButtonEnd = focusedStyle.Render("[ End ]")
+	blurredButtonEnd = fmt.Sprintf("[ %s ]", blurredStyle.Render("End"))
+
+	focusedButtonRes = focusedStyle.Render("[ Restart ]")
+	blurredButtonRes = fmt.Sprintf("[ %s ]", blurredStyle.Render("Restart"))
 
 	scoreSystem = map[int]string{
 		0: "Decimal",
@@ -93,11 +96,16 @@ func (m *model) updateInputs(msg tea.Msg) tea.Cmd {
 
 	for i := range m.inputs {
 		m.inputs[i], cmds[i] = m.inputs[i].Update(msg)
-		m.inputs[i].SetValue(numericInput(m.inputs[i].Value()))
+
+		switch i {
+		case 0, 5:
+			m.inputs[i].SetValue(m.inputs[i].Value())
+		default:
+			m.inputs[i].SetValue(numericInput(m.inputs[i].Value()))
+		}
 	}
 
 	return tea.Batch(cmds...)
-
 }
 
 func (m *model) calculateScore() {
@@ -105,11 +113,15 @@ func (m *model) calculateScore() {
 	allValid := true
 
 	for i := range m.inputs {
+		if i == 0 || i == 5 {
+			continue
+		}
+
 		if val, err := strconv.ParseFloat(m.inputs[i].Value(), 32); err == nil {
 			if val > 10.0 {
-				parameters[i] = float32(10)
+				parameters[i-1] = float32(10)
 			} else {
-				parameters[i] = float32(val)
+				parameters[i-1] = float32(val)
 			}
 		} else {
 			allValid = false
