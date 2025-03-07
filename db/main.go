@@ -3,8 +3,6 @@ package db
 import (
 	"database/sql"
 	"log"
-	"os"
-	"path/filepath"
 
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -18,7 +16,7 @@ type Rating struct {
 	Support  float32 `json:"support"`
 	Plot     float32 `json:"plot"`
 	Bias     float32 `json:"bias"`
-	Rating   float32 `json:"rating"`
+	Rating   string  `json:"rating"`
 	Comments string  `json:"comments"`
 }
 
@@ -40,15 +38,8 @@ func InitiDB() {
 }
 
 func AddRatings(db *sql.DB, ratings Rating) {
-	stmt, err := db.Prepare(
+	rows, err := db.Query(
 		"INSERT INTO rating (name, art, support, plot, bias, rating, comments) VALUES (?, ?, ?, ?, ?, ?, ?)",
-	)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer stmt.Close()
-
-	_, err = stmt.Exec(
 		ratings.Name,
 		ratings.Art,
 		ratings.Support,
@@ -60,18 +51,6 @@ func AddRatings(db *sql.DB, ratings Rating) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	return
-}
-
-func createTables(filename string) {
-	path := filepath.Join("db", "schema", filename)
-	schemeTasks, err := os.ReadFile(path)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	_, err = DB.Exec(string(schemeTasks))
-	if err != nil {
-		log.Fatal(err)
-	}
+	defer rows.Close()
+	rows.Next()
 }

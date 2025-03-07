@@ -7,6 +7,7 @@ import (
 
 	"github.com/atotto/clipboard"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/yashodhanketkar/arsg/db"
 	"github.com/yashodhanketkar/arsg/util"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -26,6 +27,9 @@ var (
 
 	keymapStyle = lipgloss.NewStyle().
 			Border(lipgloss.RoundedBorder()).Padding(0, 1)
+
+	focusedButtonCf = focusedStyle.Render("[ Confirm ]")
+	blurredButtonCf = fmt.Sprintf("[ %s ]", blurredStyle.Render("Confirm"))
 
 	focusedButtonSv = focusedStyle.Render("[ Save ]")
 	blurredButtonSv = fmt.Sprintf("[ %s ]", blurredStyle.Render("Save"))
@@ -61,6 +65,10 @@ func (m *model) setFocus(index int) (tea.Model, tea.Cmd) {
 	}
 
 	return m, tea.Batch(cmds...)
+}
+
+func (m model) isNumeric() bool {
+	return m.focusIndex != 0 && m.focusIndex != 5
 }
 
 func numericInput(str string) string {
@@ -141,4 +149,63 @@ func (m *model) calculateScore() {
 
 func (m *model) scoreToClipboard() {
 	clipboard.WriteAll(fmt.Sprintf("%.1f", m.score))
+}
+
+func (m model) prepareRating() db.Rating {
+
+	parseFloat := func(value string) float32 {
+		f, err := strconv.ParseFloat(value, 64)
+		if err != nil {
+			return 0
+		}
+		pf := float32(f)
+
+		// clamp values
+		if pf < 0.0 {
+			pf = 0.0
+		} else if pf > 10.0 {
+			pf = 10.0
+		}
+
+		return pf
+	}
+
+	return db.Rating{
+		Name:     m.inputs[0].Value(),
+		Art:      parseFloat(m.inputs[1].Value()),
+		Support:  parseFloat(m.inputs[2].Value()),
+		Plot:     parseFloat(m.inputs[3].Value()),
+		Bias:     parseFloat(m.inputs[4].Value()),
+		Rating:   fmt.Sprintf("%.1f", m.score),
+		Comments: m.inputs[5].Value(),
+	}
+}
+
+func (m model) buttonCommands() (tea.Model, tea.Cmd) {
+	l := len(m.inputs)
+	switch m.focusIndex {
+	case l:
+		if m.score >= 0.1 && m.inputs[0].Value() != "" {
+			DB := db.ConnectDB()
+			defer DB.Close()
+			db.AddRatings(DB, m.prepareRating())
+			m.resetInputs()
+			m.view = 1
+		} else {
+			m.focusIndex = 0
+			m.setFocus(m.focusIndex)
+		}
+		return m, nil
+
+	case l + 1:
+		m.resetInputs()
+		return m, nil
+
+	case l + 2:
+		return m, tea.Quit
+	default:
+		m.focusIndex++
+		m.setFocus(m.focusIndex)
+		return m, nil
+	}
 }

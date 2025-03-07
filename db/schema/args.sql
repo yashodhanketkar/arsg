@@ -5,6 +5,6 @@ CREATE TABLE IF NOT EXISTS rating (
   support REAL NOT NULL,
   plot REAL NOT NULL,
   bias REAL NOT NULL,
-  rating REAL NOT NULL,
+  rating TEXT NOT NULL,
   comments TEXT
 )
