@@ -27,17 +27,19 @@ Features
 Keybinds
 --------
 
-| Key                             | Action                                              |
-|---------------------------------|-----------------------------------------------------|
-| <kbd>?</kbd>                    | Show help message                                   |
-| <kbd>UP</kbd> or <kbd>k</kbd>   | Move cursor up                                      |
-| <kbd>DOWN</kbd> or <kbd>j</kbd> | Move cursor down                                    |
-| <kbd>c</kbd>                    | Copy score to clipboard                             |
-| <kbd>q</kbd>                    | Quit and exit application                           |
-| <kbd>r</kbd>                    | Reset focused field                                 |
-| <kbd>ESC</kbd>                  | Reset all fields and move cursor to the first field |
-| <kbd>Ctrl</kbd> <kbd>s</kbd>    | Switch scoring system                               |
-| <kbd>Ctrl</kbd> <kbd>r</kbd>    | Switch cursor mode                                  |
+| Key                                  | Action                                              |
+|--------------------------------------|-----------------------------------------------------|
+| <kbd>F1</kbd>                        | Show help message                                   |
+| <kbd>UP</kbd> or <kbd>PGUP</kbd>     | Move cursor up                                      |
+| <kbd>DOWN</kbd> or <kbd>PGDOWN</kbd> | Move cursor down                                    |
+| <kbd>HOME</kbd>                      | Move cursor to the first field                      |
+| <kbd>END</kbd>                       | Move cursor to the last field                       |
+| <kbd>c</kbd>                         | Copy score to clipboard                             |
+| <kbd>DEL</kbd>                       | Reset focused field                                 |
+| <kbd>ESC</kbd>                       | Reset all fields and move cursor to the first field |
+| <kbd>q</kbd>                         | Quit and exit application                           |
+| <kbd>CTRL</kbd> <kbd>s</kbd>         | Switch scoring system                               |
+| <kbd>CTRL</kbd> <kbd>r</kbd>         | Switch cursor mode                                  |
 
 Installation and Execution
 --------------------------
