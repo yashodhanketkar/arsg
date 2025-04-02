@@ -203,6 +203,7 @@ func (m model) buttonCommands() (tea.Model, tea.Cmd) {
 
 	case l + 2:
 		return m, tea.Quit
+
 	default:
 		m.focusIndex++
 		m.setFocus(m.focusIndex)

@@ -54,3 +54,30 @@ func AddRatings(db *sql.DB, ratings Rating) {
 	defer rows.Close()
 	rows.Next()
 }
+
+func ListRatings(db *sql.DB) []Rating {
+	ratings := make([]Rating, 0)
+	rows, err := db.Query("SELECT * FROM rating")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var rating Rating
+		err = rows.Scan(
+			&rating.ID,
+			&rating.Name,
+			&rating.Art,
+			&rating.Support,
+			&rating.Plot,
+			&rating.Bias,
+			&rating.Rating,
+			&rating.Comments,
+		)
+		if err != nil {
+			log.Fatal(err)
+		}
+		ratings = append(ratings, rating)
+	}
+	return ratings
+}

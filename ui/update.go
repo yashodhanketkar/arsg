@@ -2,6 +2,7 @@ package ui
 
 import (
 	"github.com/charmbracelet/bubbles/cursor"
+	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
@@ -22,6 +23,14 @@ func (m model) formUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		case "ctrl+q":
 			return m, tea.Batch(tea.ExitAltScreen, tea.Quit)
+
+		case "f3":
+			m.ratings = list.New(resetScoreList(), list.NewDefaultDelegate(), 128, 0)
+			m.ratings.Title = "Media Name"
+			m.view = 2
+			m.focusIndex = 0
+			m.setFocus(m.focusIndex)
+			return m, nil
 
 		// copy score to clipboard
 		case "c":
@@ -124,12 +133,34 @@ func (m model) confirmUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
+func (m model) scoreUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
+	switch msg := msg.(type) {
+	case tea.WindowSizeMsg:
+		m.ratings.SetWidth(128)
+
+	case tea.KeyMsg:
+		switch msg.String() {
+		case "ctrl+c", "q":
+			return m, tea.Batch(tea.ExitAltScreen, tea.Quit)
+
+		case "f3":
+			m.view = 0
+			return m, nil
+		}
+	}
+	var cmd tea.Cmd
+	m.ratings, cmd = m.ratings.Update(msg)
+	return m, cmd
+}
+
 func (m model) Update(msg tea.Msg) (md tea.Model, cmd tea.Cmd) {
 	switch m.view {
 	case 0:
 		md, cmd = m.formUpdate(msg)
 	case 1:
 		md, cmd = m.confirmUpdate(msg)
+	case 2:
+		md, cmd = m.scoreUpdate(msg)
 	}
 	return md, cmd
 }
