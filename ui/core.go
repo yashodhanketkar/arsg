@@ -33,7 +33,7 @@ func initialModel() model {
 
 		t = textinput.New()
 		t.Cursor.Style = cursorStyle
-		t.CharLimit = 32
+		t.CharLimit = 64
 
 		switch i {
 		case 0:

@@ -20,10 +20,7 @@ func (m model) formUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.focusIndex = len(m.inputs) + 2
 			return m.setFocus(m.focusIndex)
 
-		case "q":
-			if !m.isNumeric() {
-				break
-			}
+		case "ctrl+q":
 			return m, tea.Batch(tea.ExitAltScreen, tea.Quit)
 
 		// copy score to clipboard
