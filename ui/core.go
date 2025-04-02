@@ -1,10 +1,15 @@
 package ui
 
 import (
+	"fmt"
+
 	"github.com/charmbracelet/bubbles/cursor"
 	"github.com/charmbracelet/bubbles/help"
+	"github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
+	"github.com/yashodhanketkar/arsg/db"
 )
 
 type model struct {
@@ -16,6 +21,37 @@ type model struct {
 	help       help.Model
 	keys       KeyMap
 	view       int
+	ratings    list.Model
+}
+
+var defaultStyle = lipgloss.NewStyle().Margin(1, 2)
+
+type item struct {
+	id    int
+	title string
+	desc  string
+	score string
+}
+
+func (i item) Title() string       { return i.title }
+func (i item) Description() string { return fmt.Sprintf("%s - %s", i.score, i.desc) }
+func (i item) FilterValue() string { return i.title }
+
+func resetScoreList() []list.Item {
+	ratingList := []list.Item{}
+	DB := db.ConnectDB()
+	defer DB.Close()
+
+	for _, rating := range db.ListRatings(DB) {
+		ratingList = append(ratingList, item{
+			id:    rating.ID,
+			title: rating.Name,
+			desc:  rating.Comments,
+			score: rating.Rating,
+		})
+	}
+
+	return ratingList
 }
 
 func initialModel() model {
@@ -33,7 +69,7 @@ func initialModel() model {
 
 		t = textinput.New()
 		t.Cursor.Style = cursorStyle
-		t.CharLimit = 32
+		t.CharLimit = 64
 
 		switch i {
 		case 0:

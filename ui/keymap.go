@@ -38,8 +38,8 @@ var keys = KeyMap{
 		key.WithHelp("↓/PD", "move down"),
 	),
 	Quit: key.NewBinding(
-		key.WithKeys("q"),
-		key.WithHelp("q", "quit"),
+		key.WithKeys("ctrl+q"),
+		key.WithHelp("ctrl+q", "quit"),
 	),
 	Reset: key.NewBinding(
 		key.WithKeys("del"),

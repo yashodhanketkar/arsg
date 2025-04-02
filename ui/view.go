@@ -51,10 +51,10 @@ func (m model) formView() string {
 	b.WriteString(keymapStyle.Render(helpView))
 	b.WriteString(helpStyle.Render("\n"))
 	b.WriteString(
-		helpStyle.Render("Some shortcut keys won't work in name and comments fields. (c, q, r)"),
+		helpStyle.Render("Some shortcut keys won't work in name and comments fields. (c, r)"),
 	)
 
-	return b.String()
+	return defaultStyle.Render(b.String())
 }
 
 func (m model) confirmView() string {
@@ -64,6 +64,12 @@ func (m model) confirmView() string {
 	b.WriteString("Ratings saved successfully!\n")
 	fmt.Fprintf(&b, "\n%s\n", *confirmButton)
 
+	return defaultStyle.Render(b.String())
+}
+
+func (m model) scoreView() string {
+	var b strings.Builder
+	b.WriteString(defaultStyle.Render(m.ratings.View()))
 	return b.String()
 }
 
@@ -73,6 +79,8 @@ func (m model) View() (view string) {
 		view = m.formView()
 	case 1:
 		view = m.confirmView()
+	case 2:
+		view = m.scoreView()
 	default:
 		view = "Error"
 	}
