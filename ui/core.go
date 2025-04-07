@@ -12,6 +12,8 @@ import (
 	"github.com/yashodhanketkar/arsg/db"
 )
 
+var defaultStyle = lipgloss.NewStyle().Margin(1, 2)
+
 type model struct {
 	focusIndex int
 	inputs     []textinput.Model
@@ -24,17 +26,16 @@ type model struct {
 	ratings    list.Model
 }
 
-var defaultStyle = lipgloss.NewStyle().Margin(1, 2)
-
 type item struct {
-	id    int
-	title string
-	desc  string
-	score string
+	id         int
+	title      string
+	desc       string
+	parameters [4]float32
+	score      string
 }
 
 func (i item) Title() string       { return i.title }
-func (i item) Description() string { return fmt.Sprintf("%s - %s", i.score, i.desc) }
+func (i item) Description() string { return fmt.Sprintf("%s - %+v", i.score, i.parameters) }
 func (i item) FilterValue() string { return i.title }
 
 func resetScoreList() []list.Item {
@@ -44,10 +45,10 @@ func resetScoreList() []list.Item {
 
 	for _, rating := range db.ListRatings(DB) {
 		ratingList = append(ratingList, item{
-			id:    rating.ID,
-			title: rating.Name,
-			desc:  rating.Comments,
-			score: rating.Rating,
+			id:         rating.ID,
+			title:      rating.Name,
+			score:      rating.Rating,
+			parameters: [4]float32{rating.Art, rating.Support, rating.Plot, rating.Bias},
 		})
 	}
 
