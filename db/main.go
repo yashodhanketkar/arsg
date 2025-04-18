@@ -57,7 +57,7 @@ func AddRatings(db *sql.DB, ratings Rating) {
 
 func ListRatings(db *sql.DB) []Rating {
 	ratings := make([]Rating, 0)
-	rows, err := db.Query("SELECT * FROM rating")
+	rows, err := db.Query("SELECT * FROM rating ORDER BY name")
 	if err != nil {
 		log.Fatal(err)
 	}

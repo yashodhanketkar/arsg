@@ -29,7 +29,7 @@ go.work.sum
 coverage.out
 
 # Database files
-*.db
+args.db
 
 # Binary build output
 bin/

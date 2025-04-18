@@ -70,7 +70,7 @@ func initialModel() model {
 
 		t = textinput.New()
 		t.Cursor.Style = cursorStyle
-		t.CharLimit = 64
+		t.CharLimit = 128
 
 		switch i {
 		case 0:
@@ -92,7 +92,6 @@ func initialModel() model {
 			t.CharLimit = 5
 		case 5:
 			t.Placeholder = "Comments"
-			t.CharLimit = 128
 		}
 
 		m.inputs[i] = t

@@ -40,6 +40,10 @@ func (m model) formUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.scoreToClipboard()
 			return m, nil
 
+		case "ctrl+v":
+			m.scoreFromClipbaord()
+			return m, nil
+
 		case "f1":
 			m.help.ShowAll = !m.help.ShowAll
 

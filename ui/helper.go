@@ -151,6 +151,15 @@ func (m *model) scoreToClipboard() {
 	clipboard.WriteAll(fmt.Sprintf("%.1f", m.score))
 }
 
+func (m *model) scoreFromClipbaord() {
+	copiedText, err := clipboard.ReadAll()
+	if err != nil {
+		return
+	}
+
+	m.inputs[m.focusIndex].SetValue(copiedText)
+}
+
 func (m model) prepareRating() db.Rating {
 
 	parseFloat := func(value string) float32 {
