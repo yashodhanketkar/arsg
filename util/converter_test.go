@@ -81,3 +81,29 @@ func TestConverters(t *testing.T) {
 		}
 	})
 }
+
+func TestFloatParser(t *testing.T) {
+	t.Run("should return 0", func(t *testing.T) {
+		want := float32(0)
+		got := FloatParser("a")
+		if got != want {
+			t.Errorf("want %v; got %v", want, got)
+		}
+	})
+
+	t.Run("should return 10", func(t *testing.T) {
+		want := float32(10.0)
+		got := FloatParser("10")
+		if got != want {
+			t.Errorf("want %v; got %v", want, got)
+		}
+	})
+
+	t.Run("should return correct result", func(t *testing.T) {
+		want := float32(3.45)
+		got := FloatParser("3.45")
+		if got != want {
+			t.Errorf("want %v; got %v", want, got)
+		}
+	})
+}

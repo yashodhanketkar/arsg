@@ -88,3 +88,24 @@ func TestGetParameters(t *testing.T) {
 		}
 	})
 }
+
+func TestGetNumericInput(t *testing.T) {
+	testCases := []struct {
+		input  string
+		output string
+	}{
+		{"123.45", "123.45"},
+		{"a", ""},
+		{"1a23", "123"},
+		{"a123", "123"},
+	}
+
+	for i, tt := range testCases {
+		got := GetNumericInput(tt.input)
+		want := tt.output
+
+		if got != want {
+			t.Errorf("[%d] want %v; got %v", i+1, want, got)
+		}
+	}
+}

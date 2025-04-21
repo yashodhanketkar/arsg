@@ -2,6 +2,7 @@ package util
 
 import (
 	"math"
+	"strconv"
 )
 
 func SystemCalculator(systemType string, score float32) float32 {
@@ -31,4 +32,20 @@ func SystemCalculator(systemType string, score float32) float32 {
 	}
 
 	return converted_score
+}
+
+func FloatParser(value string) float32 {
+	floatValue, error := strconv.ParseFloat(value, 64)
+	if error != nil {
+		return 0
+	}
+	parsedFloat := float32(floatValue)
+
+	if parsedFloat < 0.0 {
+		parsedFloat = 0.0
+	} else if parsedFloat > 10.0 {
+		parsedFloat = 10.0
+	}
+
+	return parsedFloat
 }
