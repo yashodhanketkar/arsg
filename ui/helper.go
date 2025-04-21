@@ -3,7 +3,6 @@ package ui
 import (
 	"fmt"
 	"strconv"
-	"strings"
 
 	"github.com/atotto/clipboard"
 	"github.com/charmbracelet/lipgloss"
@@ -71,17 +70,6 @@ func (m model) isNumeric() bool {
 	return m.focusIndex != 0 && m.focusIndex != 5
 }
 
-func numericInput(str string) string {
-	var inputBuilder strings.Builder
-
-	for _, r := range str {
-		if strings.ContainsRune("0123456789.", r) {
-			inputBuilder.WriteRune(r)
-		}
-	}
-	return inputBuilder.String()
-}
-
 func (m *model) resetInputs() tea.Cmd {
 	cmds := make([]tea.Cmd, len(m.inputs))
 
@@ -109,7 +97,7 @@ func (m *model) updateInputs(msg tea.Msg) tea.Cmd {
 		case 0, 5:
 			m.inputs[i].SetValue(m.inputs[i].Value())
 		default:
-			m.inputs[i].SetValue(numericInput(m.inputs[i].Value()))
+			m.inputs[i].SetValue(util.GetNumericInput(m.inputs[i].Value()))
 		}
 	}
 
@@ -161,30 +149,12 @@ func (m *model) scoreFromClipbaord() {
 }
 
 func (m model) prepareRating() db.Rating {
-
-	parseFloat := func(value string) float32 {
-		f, err := strconv.ParseFloat(value, 64)
-		if err != nil {
-			return 0
-		}
-		pf := float32(f)
-
-		// clamp values
-		if pf < 0.0 {
-			pf = 0.0
-		} else if pf > 10.0 {
-			pf = 10.0
-		}
-
-		return pf
-	}
-
 	return db.Rating{
 		Name:     m.inputs[0].Value(),
-		Art:      parseFloat(m.inputs[1].Value()),
-		Support:  parseFloat(m.inputs[2].Value()),
-		Plot:     parseFloat(m.inputs[3].Value()),
-		Bias:     parseFloat(m.inputs[4].Value()),
+		Art:      util.FloatParser(m.inputs[1].Value()),
+		Support:  util.FloatParser(m.inputs[2].Value()),
+		Plot:     util.FloatParser(m.inputs[3].Value()),
+		Bias:     util.FloatParser(m.inputs[4].Value()),
 		Rating:   fmt.Sprintf("%.1f", m.score),
 		Comments: m.inputs[5].Value(),
 	}

@@ -3,6 +3,7 @@ package util
 import (
 	"fmt"
 	"strconv"
+	"strings"
 )
 
 func Input(valueType string) float32 {
@@ -30,4 +31,16 @@ func GetParameters() [4]float32 {
 	bias := Input("Bias")
 
 	return [4]float32{art, plot, characters, bias}
+}
+
+func GetNumericInput(str string) string {
+	var inputBuilder strings.Builder
+
+	for _, r := range str {
+		if strings.ContainsRune("0123456789.", r) {
+			inputBuilder.WriteRune(r)
+		}
+	}
+
+	return inputBuilder.String()
 }
