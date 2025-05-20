@@ -31,10 +31,9 @@ clean:
 
 getcover: cover
 	@go tool cover -html=./out/coverage.out -o ./out/coverage.html
-	@powershell -Command "Start-Process '.\out\coverage.html'"
 
 cover:
-	@if not exist out mkdir out
+	@mkdir -p out
 	@go test -coverprofile=./out/coverage.out ./...
 
 help:
