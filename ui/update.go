@@ -37,11 +37,11 @@ func (m model) formUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if !m.isNumeric() {
 				break
 			}
-			m.scoreToClipboard()
+			m.copyToClipboard()
 			return m, nil
 
 		case "ctrl+v":
-			m.scoreFromClipbaord()
+			m.pasteFromClipbaord()
 			return m, nil
 
 		case "f1":

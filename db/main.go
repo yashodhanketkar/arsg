@@ -3,6 +3,7 @@ package db
 import (
 	"database/sql"
 	"log"
+	"os"
 
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -28,13 +29,13 @@ func ConnectDB() *sql.DB {
 	return db
 }
 
-func InitiDB() {
+func InitDB() {
 	var err error
 	if DB, err = sql.Open("sqlite3", "args.db"); err != nil {
 		log.Fatal(err)
 	}
 	defer DB.Close()
-	createTables("args.sql")
+	createTables(DB, "db/schema/args.sql")
 }
 
 func AddRatings(db *sql.DB, ratings Rating) {
@@ -80,4 +81,17 @@ func ListRatings(db *sql.DB) []Rating {
 		ratings = append(ratings, rating)
 	}
 	return ratings
+}
+
+func createTables(db *sql.DB, path string) {
+	// path := filepath.Join("db", "schema", filename)
+	schemeTasks, err := os.ReadFile(path)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	_, err = db.Exec(string(schemeTasks))
+	if err != nil {
+		log.Fatal(err)
+	}
 }

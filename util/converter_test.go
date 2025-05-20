@@ -5,9 +5,7 @@ import (
 )
 
 func TestConverters(t *testing.T) {
-
 	t.Run("should return correct values", func(t *testing.T) {
-
 		converterMinTest := []struct {
 			score      float32
 			systemType string
@@ -23,7 +21,6 @@ func TestConverters(t *testing.T) {
 		}
 
 		for _, tt := range converterMinTest {
-
 			got := SystemCalculator(tt.systemType, tt.score)
 			want := tt.output
 
@@ -34,7 +31,6 @@ func TestConverters(t *testing.T) {
 	})
 
 	t.Run("should return highest possible values", func(t *testing.T) {
-
 		converterMinTest := []struct {
 			score      float32
 			systemType string
@@ -47,7 +43,6 @@ func TestConverters(t *testing.T) {
 		}
 
 		for _, tt := range converterMinTest {
-
 			got := SystemCalculator(tt.systemType, tt.score)
 			want := tt.output
 
@@ -58,7 +53,6 @@ func TestConverters(t *testing.T) {
 	})
 
 	t.Run("should return lowest possible values", func(t *testing.T) {
-
 		converterMinTest := []struct {
 			score      float32
 			systemType string
@@ -71,7 +65,6 @@ func TestConverters(t *testing.T) {
 		}
 
 		for _, tt := range converterMinTest {
-
 			got := SystemCalculator(tt.systemType, tt.score)
 			want := tt.output
 
@@ -83,27 +76,25 @@ func TestConverters(t *testing.T) {
 }
 
 func TestFloatParser(t *testing.T) {
-	t.Run("should return 0", func(t *testing.T) {
-		want := float32(0)
-		got := FloatParser("a")
-		if got != want {
-			t.Errorf("want %v; got %v", want, got)
-		}
-	})
+	tests := []struct {
+		value    string
+		expected float32
+	}{
+		{"a", 0.0},
+		{"", 0.0},
+		{"10", 10.0},
+		{"0", 0.0},
+		{"-5", 0.0},
+		{"-0.001", 0.0},
+		{"15", 10.0},
+		{"10.001", 10.0},
+	}
 
-	t.Run("should return 10", func(t *testing.T) {
-		want := float32(10.0)
-		got := FloatParser("10")
+	for _, tt := range tests {
+		want := float32(tt.expected)
+		got := FloatParser(tt.value)
 		if got != want {
 			t.Errorf("want %v; got %v", want, got)
 		}
-	})
-
-	t.Run("should return correct result", func(t *testing.T) {
-		want := float32(3.45)
-		got := FloatParser("3.45")
-		if got != want {
-			t.Errorf("want %v; got %v", want, got)
-		}
-	})
+	}
 }

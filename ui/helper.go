@@ -67,7 +67,7 @@ func (m *model) setFocus(index int) (tea.Model, tea.Cmd) {
 }
 
 func (m model) isNumeric() bool {
-	return m.focusIndex != 0 && m.focusIndex != 5
+	return m.focusIndex > 0 && m.focusIndex < 5
 }
 
 func (m *model) resetInputs() tea.Cmd {
@@ -135,11 +135,11 @@ func (m *model) calculateScore() {
 	}
 }
 
-func (m *model) scoreToClipboard() {
+func (m *model) copyToClipboard() {
 	clipboard.WriteAll(fmt.Sprintf("%.1f", m.score))
 }
 
-func (m *model) scoreFromClipbaord() {
+func (m *model) pasteFromClipbaord() {
 	copiedText, err := clipboard.ReadAll()
 	if err != nil {
 		return

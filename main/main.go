@@ -28,6 +28,6 @@ func mainLoop() []float32 {
 }
 
 func main() {
-	db.InitiDB()
+	db.InitDB()
 	ui.TeaUI()
 }
