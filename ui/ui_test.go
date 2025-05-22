@@ -8,12 +8,8 @@ import (
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/stretchr/testify/assert"
+	"github.com/yashodhanketkar/arsg/db"
 )
-
-// _, cmd := m.Update(tea.KeyMsg{Type: tea.KeyCtrlC})
-// _, ok := cmd().(tea.QuitMsg)
-// assert.Nil(t, m.session.error)
-// assert.True(t, ok)
 
 func TestInit(t *testing.T) {
 	m := initialModel()
@@ -117,6 +113,66 @@ func TestHelpers(t *testing.T) {
 	t.Run("test updateInputs", func(t *testing.T) {
 		m := initialModel()
 		m.updateInputs(tea.KeyMsg{Type: tea.KeyEnter})
+	})
+
+	t.Run("test prepare ratings", func(t *testing.T) {
+		m := initialModel()
+		mockValue(t, m)
+		m.calculateScore()
+		got := m.prepareRating()
+
+		expected := db.Rating{
+			Name:     "test",
+			Art:      8.5,
+			Support:  7.5,
+			Plot:     6.5,
+			Bias:     5.5,
+			Rating:   "6.8",
+			Comments: "comment",
+		}
+
+		assert.Equal(t, expected, got)
+	})
+}
+
+func TestButtonCommands(t *testing.T) {
+
+	t.Run("test default behaviour", func(t *testing.T) {
+		m := initialModel()
+		nm, cmd := m.buttonCommands()
+		assert.Nil(t, cmd)
+
+		switch nmt := nm.(type) {
+		case model:
+			assert.Equal(t, m.focusIndex+1, nmt.focusIndex)
+		default:
+			t.Errorf("incorrect model recieved. %T", nm)
+		}
+	})
+
+	t.Run("test reset button", func(t *testing.T) {
+		m := initialModel()
+		mockValue(t, m)
+		m.calculateScore()
+		m.focusIndex = len(m.inputs) + 1
+		nm, cmd := m.buttonCommands()
+		assert.Nil(t, cmd)
+
+		switch nm := nm.(type) {
+		case model:
+			assert.Equal(t, 0, nm.focusIndex)
+			assert.Equal(t, float32(0.0), nm.score)
+		default:
+			t.Errorf("incorrect model recieved. %T", nm)
+		}
+
+		t.Run("test quit button", func(t *testing.T) {
+			m := initialModel()
+			m.focusIndex = len(m.inputs) + 2
+			_, cmd := m.buttonCommands()
+			_, ok := cmd().(tea.QuitMsg)
+			assert.True(t, ok)
+		})
 	})
 }
 
