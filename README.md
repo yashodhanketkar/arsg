@@ -38,6 +38,7 @@ Keybinds
 | <kbd>DEL</kbd>                       | Reset focused field                                 |
 | <kbd>ESC</kbd>                       | Reset all fields and move cursor to the first field |
 | <kbd>q</kbd>                         | Quit and exit application                           |
+| <kbd>CTRL</kbd> <kbd>e</kbd>         | Export ratings into export.json                     |
 | <kbd>CTRL</kbd> <kbd>s</kbd>         | Switch scoring system                               |
 | <kbd>CTRL</kbd> <kbd>r</kbd>         | Switch cursor mode                                  |
 

@@ -4,14 +4,26 @@ import (
 	"github.com/charmbracelet/bubbles/cursor"
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/yashodhanketkar/arsg/db"
 )
 
 func (m model) formUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
+
 		case "ctrl+c":
 			return m, tea.Batch(tea.ExitAltScreen, tea.Quit)
+
+		case "ctrl+e":
+			// FIX: Directly calling follwing functions was causing nil pointer error
+			// so they are wrapped for now. will fix this issue later
+			func() {
+				DB := db.ConnectDB()
+				defer DB.Close()
+				db.ExportData(DB)
+			}()
+			return m, nil
 
 		case "home":
 			m.focusIndex = 0
@@ -105,7 +117,7 @@ func (m model) formUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 
 			// handle focus and styles
-			if m.focusIndex > len(m.inputs)+2 {
+			if m.focusIndex > len(m.inputs)+3 {
 				m.focusIndex = 0
 			} else if m.focusIndex < 0 {
 				m.focusIndex = len(m.inputs) + 2

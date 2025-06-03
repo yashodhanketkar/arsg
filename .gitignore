@@ -44,3 +44,6 @@ Thumbs.db
 # Linux related files
 *.cgo1.go
 *.cgo2.c
+
+# Local files
+export.json

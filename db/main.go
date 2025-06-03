@@ -2,6 +2,7 @@ package db
 
 import (
 	"database/sql"
+	"encoding/json"
 	"log"
 	"os"
 
@@ -84,13 +85,37 @@ func ListRatings(db *sql.DB) []Rating {
 }
 
 func createTables(db *sql.DB, path string) {
-	// path := filepath.Join("db", "schema", filename)
 	schemeTasks, err := os.ReadFile(path)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	_, err = db.Exec(string(schemeTasks))
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+func ExportData(db *sql.DB) {
+	data := ListRatings(db)
+	jsonData, err := json.MarshalIndent(data, "", "  ")
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	file, err := os.Create("export.json")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer file.Close()
+
+	_, err = file.Write(jsonData)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = file.Sync()
 	if err != nil {
 		log.Fatal(err)
 	}
