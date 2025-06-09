@@ -1,4 +1,4 @@
-package ui
+package util
 
 import (
 	"github.com/charmbracelet/bubbles/key"
@@ -30,7 +30,7 @@ func (k KeyMap) FullHelp() [][]key.Binding {
 	}
 }
 
-var keys = KeyMap{
+var AppKeys = KeyMap{
 	Up: key.NewBinding(
 		key.WithKeys("pgup", "up"),
 		key.WithHelp("↑/PU", "move up"),

@@ -9,7 +9,10 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/stretchr/testify/assert"
 	"github.com/yashodhanketkar/arsg/db"
+	"github.com/yashodhanketkar/arsg/util"
 )
+
+var keys = util.AppKeys
 
 func TestInit(t *testing.T) {
 	m := initialModel()

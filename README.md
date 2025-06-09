@@ -61,6 +61,12 @@ Installation and Execution
 		go run ./main/main.go
 		```
 
+	-	If you have make installed, you can run the following command to build the application:
+
+		```sh
+		make run
+		```
+
 3.	Build the executable:
 
 	-	If the application works as intended, you can build the executable file for future use. Run the following command to compile the application:
@@ -75,6 +81,12 @@ Installation and Execution
 		go build ./main/main.go
 		```
 
+	-	If you have make installed, you can run the following command to build the application:
+
+		```sh
+		make build
+		```
+
 4.	Use the compiled executable:
 
 Once the application is successfully compiled, an executable file will be generated, which you can use for future runs without needing to recompile.
@@ -84,20 +96,24 @@ TODO
 
 ### Phase 1
 
--	Build a simple 4-parameter scoring system, with bias as the fourth parameter.
--	Create test cases and a score converter for sites based on user preferences.
+-	[X] Build a simple 4-parameter scoring system, with bias as the fourth parameter. (Completed)
+-	[X] Create test cases and a score converter for sites based on user preferences. (Completed)
 
 ### Phase 2
 
--	Make the system more customizable by allowing users to add or remove parameters.
--	Enable the application to import and export JSON files from tracking platforms, allowing users to upload their list with minimal hassle.
+-	[X] Enable the application to export JSON files
+-	[X] Add a UI-based control system.
+-	[X] Provide executable releases.
 
 ### Phase 3
 
--	Add API support for major tracking platforms such as MyAnimeList, AniList, etc.
--	Add a UI-based control system.
--	Include in-application documentation.
--	Provide executable releases.
+-	[ ] Make the system more customizable by allowing users to add or remove parameters.
+-	[ ] Include in-application documentation.
+
+### Phase 4
+
+-	[ ] Add API support for major tracking platforms such as MyAnimeList, AniList, etc.
+-	[ ] Enable the application to import and export JSON files wrt tracking platforms, allowing users to upload their list with minimal hassle.
 
 License
 -------

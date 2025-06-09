@@ -1,6 +1,9 @@
 package ui
 
 import (
+	"fmt"
+	"strings"
+
 	"github.com/charmbracelet/bubbles/cursor"
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
@@ -134,49 +137,54 @@ func (m model) formUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, cmd
 }
 
-func (m model) confirmUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
-	switch msg := msg.(type) {
-	case tea.KeyMsg:
-		switch msg.String() {
-		case "ctrl+c":
-			return m, tea.Batch(tea.ExitAltScreen, tea.Quit)
+func (m model) formView() string {
+	var b strings.Builder
+	helpView := m.help.View(m.keys)
 
-		case "enter", " ":
-			m.view = 0
-			return m, nil
+	for i := range m.inputs {
+		b.WriteString(m.inputs[i].View())
+		if i < len(m.inputs)-1 {
+			b.WriteRune('\n')
 		}
 	}
-	return m, nil
-}
 
-func (m model) scoreUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
-	switch msg := msg.(type) {
-	case tea.WindowSizeMsg:
-		m.ratings.SetWidth(128)
+	saveButton := &blurredButtonSv
+	restartButton := &blurredButtonRes
+	endButton := &blurredButtonEnd
 
-	case tea.KeyMsg:
-		switch msg.String() {
-		case "ctrl+c", "q":
-			return m, tea.Batch(tea.ExitAltScreen, tea.Quit)
-
-		case "f3":
-			m.view = 0
-			return m, nil
-		}
+	if m.focusIndex == len(m.inputs) {
+		saveButton = &focusedButtonSv
 	}
-	var cmd tea.Cmd
-	m.ratings, cmd = m.ratings.Update(msg)
-	return m, cmd
-}
 
-func (m model) Update(msg tea.Msg) (md tea.Model, cmd tea.Cmd) {
-	switch m.view {
-	case 0:
-		md, cmd = m.formUpdate(msg)
-	case 1:
-		md, cmd = m.confirmUpdate(msg)
-	case 2:
-		md, cmd = m.scoreUpdate(msg)
+	if m.focusIndex == len(m.inputs)+1 {
+		restartButton = &focusedButtonRes
 	}
-	return md, cmd
+
+	if m.focusIndex == len(m.inputs)+2 {
+		endButton = &focusedButtonEnd
+	}
+
+	b.WriteString("\n\nRating: ")
+	b.WriteString(resultStyle.Render(fmt.Sprintf("%.1f", m.score)))
+
+	fmt.Fprintf(&b, "\n\n%s\n", *saveButton)
+	fmt.Fprintf(&b, "%s\n", *restartButton)
+	fmt.Fprintf(&b, "%s\n\n", *endButton)
+
+	b.WriteString(helpStyle.Render("cursor mode is "))
+	b.WriteString(cursorModeHelpStyle.Render(m.cursorMode.String()))
+	b.WriteString(helpStyle.Render(" (ctrl+r to change style)"))
+
+	b.WriteString(helpStyle.Render("\nscore mode is "))
+	b.WriteString(cursorModeHelpStyle.Render(scoreSystem[m.scoreMode]))
+	b.WriteString(helpStyle.Render(" system (ctrl+s to change score system)"))
+
+	b.WriteString(helpStyle.Render("\n"))
+	b.WriteString(keymapStyle.Render(helpView))
+	b.WriteString(helpStyle.Render("\n"))
+	b.WriteString(
+		helpStyle.Render("Some shortcut keys won't work in name and comments fields. (c, r)"),
+	)
+
+	return defaultStyle.Render(b.String())
 }
