@@ -8,6 +8,7 @@ import (
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/bubbles/textinput"
+	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/yashodhanketkar/arsg/util"
 )
@@ -22,6 +23,9 @@ type model struct {
 	keys       util.KeyMap
 	view       int
 	ratings    list.Model
+	docs       string
+	lastview   int
+	viewport   viewport.Model
 }
 
 func initialModel() model {
@@ -65,6 +69,11 @@ func initialModel() model {
 
 		m.inputs[i] = t
 	}
+
+	content := m.loadDocs()
+	m.docs = content
+	m.viewport = viewport.New(128, 24)
+	m.viewport.SetContent(m.docs)
 
 	return m
 }

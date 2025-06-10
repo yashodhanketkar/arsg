@@ -2,6 +2,8 @@ package ui
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 	"strconv"
 
 	"github.com/atotto/clipboard"
@@ -219,4 +221,22 @@ func resetScoreList() []list.Item {
 	}
 
 	return ratingList
+}
+
+func (m *model) loadDocs() string {
+	path, err := filepath.Abs("docs/manual.md")
+
+	if err != nil {
+		fmt.Println("could not find documentation file:", err)
+		os.Exit(1)
+	}
+
+	content, err := os.ReadFile(path)
+
+	if err != nil {
+		fmt.Println("could not load documentation file:", err)
+		os.Exit(1)
+	}
+
+	return string(content)
 }

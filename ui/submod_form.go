@@ -10,7 +10,7 @@ import (
 	"github.com/yashodhanketkar/arsg/db"
 )
 
-func (m model) formUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m *model) formUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
@@ -59,8 +59,13 @@ func (m model) formUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.pasteFromClipbaord()
 			return m, nil
 
-		case "f1":
+		case "?":
 			m.help.ShowAll = !m.help.ShowAll
+
+		case "f1":
+			m.lastview = m.view
+			m.view = 3
+			return m, nil
 
 		// reset focused input
 		case "delete":
@@ -137,7 +142,7 @@ func (m model) formUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, cmd
 }
 
-func (m model) formView() string {
+func (m *model) formView() string {
 	var b strings.Builder
 	helpView := m.help.View(m.keys)
 

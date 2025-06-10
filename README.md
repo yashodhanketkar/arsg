@@ -108,7 +108,7 @@ TODO
 ### Phase 3
 
 -	[ ] Make the system more customizable by allowing users to add or remove parameters.
--	[ ] Include in-application documentation.
+-	[X] Include in-application documentation.
 
 ### Phase 4
 
