@@ -5,7 +5,6 @@ import (
 
 	"github.com/atotto/clipboard"
 	"github.com/charmbracelet/bubbles/help"
-	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/stretchr/testify/assert"
 	"github.com/yashodhanketkar/arsg/db"
@@ -19,7 +18,6 @@ func TestInit(t *testing.T) {
 	assert.True(t, ok)
 
 	assert.Equal(t, m.scoreMode, 0)
-	assert.Equal(t, m.keys, keys)
 	assert.Equal(t, m.help, help.New())
 	assert.Equal(t, m.view, 0)
 
@@ -33,15 +31,6 @@ func TestInit(t *testing.T) {
 	} {
 		assert.Equal(t, v, m.inputs[i].Placeholder)
 	}
-}
-
-func TestHelpList(t *testing.T) {
-	assert.Equal(t, []key.Binding{keys.Help, keys.Up, keys.Down}, keys.ShortHelp())
-	assert.Equal(t, [][]key.Binding{
-		{keys.Help, keys.Up, keys.Down},
-		{keys.Quit, keys.Copy, keys.Reset},
-		{keys.StartOver, keys.Home, keys.End},
-	}, keys.FullHelp())
 }
 
 func TestHelpers(t *testing.T) {

@@ -2,9 +2,12 @@ package ui
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 	"strconv"
 
 	"github.com/atotto/clipboard"
+	"github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/yashodhanketkar/arsg/db"
 	"github.com/yashodhanketkar/arsg/util"
@@ -13,6 +16,7 @@ import (
 )
 
 var (
+	defaultStyle        = lipgloss.NewStyle().Margin(1, 2)
 	focusedStyle        = lipgloss.NewStyle().Foreground(lipgloss.Color("205"))
 	blurredStyle        = lipgloss.NewStyle().Foreground(lipgloss.Color("240"))
 	cursorStyle         = focusedStyle
@@ -46,6 +50,18 @@ var (
 		3: "Percentage",
 	}
 )
+
+type item struct {
+	id         int
+	title      string
+	desc       string
+	parameters [4]float32
+	score      string
+}
+
+func (i item) Title() string       { return i.title }
+func (i item) Description() string { return fmt.Sprintf("%s - %+v", i.score, i.parameters) }
+func (i item) FilterValue() string { return i.title }
 
 func (m *model) setFocus(index int) (tea.Model, tea.Cmd) {
 	cmds := make([]tea.Cmd, len(m.inputs))
@@ -188,4 +204,33 @@ func (m model) buttonCommands() (tea.Model, tea.Cmd) {
 		m.setFocus(m.focusIndex)
 		return m, nil
 	}
+}
+
+func resetScoreList() []list.Item {
+	ratingList := []list.Item{}
+	DB := db.ConnectDB()
+	defer DB.Close()
+
+	for _, rating := range db.ListRatings(DB) {
+		ratingList = append(ratingList, item{
+			id:         rating.ID,
+			title:      rating.Name,
+			score:      rating.Rating,
+			parameters: [4]float32{rating.Art, rating.Support, rating.Plot, rating.Bias},
+		})
+	}
+
+	return ratingList
+}
+
+func (m *model) loadDocs() string {
+	path := filepath.Join(os.Getenv("HOME"), ".local/share/args/lib/docs/manual.md")
+	content, err := os.ReadFile(path)
+
+	if err != nil {
+		fmt.Println("could not load documentation file:", err)
+		os.Exit(1)
+	}
+
+	return string(content)
 }
