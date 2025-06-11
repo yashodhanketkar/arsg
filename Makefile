@@ -14,8 +14,16 @@ start:
 startclean: build
 	@./build/${PROJECT_NAME}
 
-build: test clean 
+build: clean 
 	@go build -o ./build/${PROJECT_NAME} ./main/main.go
+
+install: build
+	@chmod a+x ./install.sh
+	@./install.sh
+
+uninstall:
+	@chmod a+x ./install.sh
+	@./uninstall.sh
 
 commit: add
 	@git commit

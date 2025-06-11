@@ -224,13 +224,7 @@ func resetScoreList() []list.Item {
 }
 
 func (m *model) loadDocs() string {
-	path, err := filepath.Abs("docs/manual.md")
-
-	if err != nil {
-		fmt.Println("could not find documentation file:", err)
-		os.Exit(1)
-	}
-
+	path := filepath.Join(os.Getenv("HOME"), ".local/share/args/lib/docs/manual.md")
 	content, err := os.ReadFile(path)
 
 	if err != nil {

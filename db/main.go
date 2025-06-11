@@ -5,11 +5,17 @@ import (
 	"encoding/json"
 	"log"
 	"os"
+	"path/filepath"
 
 	_ "github.com/mattn/go-sqlite3"
 )
 
-var DB *sql.DB
+var (
+	DB *sql.DB
+
+	basePath = filepath.Join(os.Getenv("HOME"), ".local/share/args/lib")
+	dbPath   = filepath.Join(basePath, "arsg.db")
+)
 
 type Rating struct {
 	ID       int     `json:"id"`
@@ -23,20 +29,28 @@ type Rating struct {
 }
 
 func ConnectDB() *sql.DB {
-	db, err := sql.Open("sqlite3", "args.db")
+	db, err := sql.Open("sqlite3", dbPath)
+
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	return db
 }
 
 func InitDB() {
 	var err error
-	if DB, err = sql.Open("sqlite3", "args.db"); err != nil {
+
+	if tempErr := os.Mkdir(filepath.Dir(basePath), 0755); !os.IsExist(tempErr) {
+		log.Fatal(tempErr)
+	}
+
+	if DB, err = sql.Open("sqlite3", dbPath); err != nil {
 		log.Fatal(err)
 	}
+
 	defer DB.Close()
-	createTables(DB, "db/schema/args.sql")
+	createTables(DB, filepath.Join(basePath, "schema/arsg.sql"))
 }
 
 func AddRatings(db *sql.DB, ratings Rating) {
