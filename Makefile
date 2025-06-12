@@ -1,5 +1,4 @@
 # INFO: Project variables
-PROJECT_NAME := $(shell basename $(CURDIR))
 .PHONY: run start build commit add test getcover cover clean
 
 default: help
@@ -9,13 +8,13 @@ run:
 	@go run main/main.go
 
 start:
-	@./build/${PROJECT_NAME}
+	@./build/arsg
 
 startclean: build
-	@./build/${PROJECT_NAME}
+	@./build/arsg
 
 build: clean 
-	@go build -o ./build/${PROJECT_NAME} ./main/main.go
+	@go build -o ./build/arsg
 
 install: build
 	@chmod a+x ./install.sh

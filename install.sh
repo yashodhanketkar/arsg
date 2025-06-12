@@ -1,5 +1,16 @@
 #!/bin/bash
 
+echo "Checking system requirements..."
+
+# check if requirements are met
+./check-requirements.sh
+if [ $? -ne 0 ]; then
+  echo "Installation aborted due to unmet dependencies."
+  exit 1
+fi
+
+echo "Requirements met. Proceeding with installation..."
+
 # setting up directory path variables
 BASEPATHREPO=$(pwd)
 BASEPATHINSTALL=$HOME/.local/share/args
