@@ -1,115 +1,130 @@
 ARSG
 ====
 
-Table of Content
-----------------
+Table of Contents
+-----------------
 
--	[ARSG](#arsg)
-	-	[Introduction](#introduction)
-	-	[System Requirements](#system-requirements)
-	-	[Installation](#installation)
-	-	[User Interface Overview](#user-interface-overview)
-	-	[Using ARSG](#using-arsg)
-	-	[Frequently Asked Questions (FAQ)](#frequently-asked-questions-faq)
-	-	[Troubleshooting](#troubleshooting)
-	-	[Support](#support)
+-	[Introduction](#introduction)
+-	[Installation](#installation)
+	-	[From Source](#from-source)
+-	[User Interface Overview](#user-interface-overview)
+	-	[Main View](#main-view)
+	-	[Ratings View](#ratings-view)
+	-	[Docs View](#docs-view)
+-	[Using ARSG](#using-arsg)
+	-	[Keyboard Shortcuts](#keyboard-shortcuts)
+-	[Contact](#contact)
 
 Introduction
 ------------
 
-Anime Rater and Score Generator (ARSG) is a tool designed to generate anime scores based on both user experience and objective ratings. The goal of this project is to create a tool that helps users generate scores for sites such as MyAnimeList, AniList, or any other anime tracking platforms.
+Anime Rater and Score Generator (ARSG) is a simple, terminal-based tool designed to help users generate anime scores based on both subjective experience and objective criteria. It's especially useful for rating entries on platforms like MyAnimeList, AniList, or similar anime tracking services. System Requirements
 
-System Requirements
--------------------
-
--	GoLang 1.24.3+
--	Sqlite3 3.49.2+
--	Make 4.4.1+ (optional)
+-	GoLang 1.24.3 or later
+-	SQLite3 3.49.2 or later
+-	Make 4.4.1 or later (optional)
 
 Installation
 ------------
 
 ### From Source
 
-#### makefile
+#### Using make
 
-1.	Clone the repository
-2.	Run `make install` to install the binary
-3.	Run `arsg` to start the application
+-	Clone the repository.
+-	Run make install to build and install the binary.
+-	Run arsg to start the application.
 
-#### manual
+#### Manual Installation
 
-1.	Clone the repository
-2.	Run `go build -o ./build/${PROJECT_NAME} ./main/main.go`
-3.	Copy the binary file to `$HOME/local/bin` directory
-4.	Create and copy contents of docs to `$HOME/local/share/args` directory
-5.	Run `arsg` to start the application
+-	Clone the repository.
+-	Run go build -o ./build/${PROJECT_NAME} ./main/main.go
+-	Copy the binary to your $HOME/local/bin directory.
+-	Create the docs directory at $HOME/local/share/arsg and copy the documentation files there.
+-	Run arsg to launch the application.
 
 User Interface Overview
 -----------------------
 
-ARSG applications UI is consist two modes with three different views.
+The ARSG application offers two modes with three different views:
 
--	**Main View** - This view is the default view of the application consist form for the user.
+-	Main View – The default input form where users enter ratings.
+-	Ratings View – Displays saved entries and their calculated scores.
+-	Docs View – Displays this user manual inside the application.
 
--	**Ratings View** - This list view displays the generated score for the user.
+### Main View
 
--	**Docs view** - This view displays the documentation for the application.
+This is the primary view, featuring:
 
-### Main view
+```
+- Text Inputs
+  - Name
+  - Comments (optional)
 
-The main view consist of the input fields and buttons for the user along with help text consisting of key bindings.
+- Numerical Inputs (accepts numbers only):
+  - Art/Animation
+  - Character/Cast
+  - Plot
+  - Bias
 
-User Input fields:
+- Buttons:
+  - Save – Stores the data in the database.
+  - Restart – Clears all fields and resets to defaults.
+  - End – Exits the application.
 
--	Text input (alphabets, numbers, and symbols)
+- Output:
+  - Score – Automatically generated from your inputs; can be copied to clipboard.
+  - Help Box: Located at the bottom; displays available key bindings.
+```
 
-	-	Name
-	-	Comments
+### Ratings View
 
--	Number input (numbers only)
+Displays stored entries (name, ratings, score). A search allows you to filter entries by media name.
 
-	-	Art/Animation
-	-	Character/Cast
-	-	Plot
-	-	Bias
+Navigation key:
 
--	Buttons
+<kbd>F1</kbd> – Opens Docs View
 
-	-	**Save**: Saves info, ratings and score to the database.
-	-	**Restart**: Resets the input fields to their default values.
-	-	**End**: Exits the application.
+<kbd>F3</kbd> – Returns to Main View
 
--	Output
+### Docs View
 
-	-	**Score**: Displays the generated score for the user. Can be copied to clipboard.
+Displays this manual.
 
-### Ratings view
+Navigation key:
 
-Displays the store info, ratings and final scores of media from database. The user can filter the list by media name.
-
-### Docs view
-
-Displays this manual/documentation of application.
+<kbd>F1</kbd> – Returns to the previously visited view (Main or Ratings)
 
 Using ARSG
 ----------
 
-WIP
+In the Main View, enter the required details in the input fields. After filling in the numerical fields, a score is automatically calculated and shown in the output field.
 
-Frequently Asked Questions (FAQ)
---------------------------------
+#### To save a rating:
 
-WIP
+-	Name and all numerical fields are required.
+-	Comments is optional.
+-	Click Save to store the entry. A confirmation dialog appears with a Confirm button to return to the main view.
 
-Troubleshooting
----------------
+#### To reset:
 
-WIP
+-	Click Restart to clear all fields and reset focus to the Name field.
 
-Support
+#### To exit:
+
+-	Click End to close the application.
+
+### Keyboard Shortcuts:
+
+<kbd>F1</kbd> – Switch to Docs View
+
+<kbd>F3</kbd> – Switch to Ratings View (from Main or Docs)
+
+Note: Refer to the help box at the bottom of the screen for a full list of key bindings. Support
+
+Contact
 -------
 
-Contact me on github: [yashodhan](https://github.com/yashodhanketkar/)
+Github: [yashodhan](https://github.com/yashodhanketkar/)
 
-Or email me at: [kykyashodhan@gmail.com](mailto:kykyashodhan@gmail.com)
+Email: [kykyashodhan@gmail.com](mailto:kykyashodhan@gmail.com)

@@ -5,7 +5,7 @@ toBackup="n"
 
 # cleaning binary file from users bin directory
 echo "Removing executable/binary..."
-rm -rf ${HOME}/.local/bin/${PROJECT_NAME}
+rm -rf ${HOME}/.local/bin/arsg
 sleep 0.5
 
 # get response for toBackup variable if backup database exists
