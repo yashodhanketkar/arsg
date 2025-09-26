@@ -9,26 +9,6 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-var (
-	titleStyle = func() lipgloss.Style {
-		b := lipgloss.RoundedBorder()
-		b.Right = "├"
-		return lipgloss.NewStyle().
-			BorderStyle(b).
-			Padding(0, 1).
-			Foreground(lipgloss.Color("205")).
-			BorderForeground(lipgloss.Color("205"))
-	}()
-
-	infoStyle = func() lipgloss.Style {
-		b := lipgloss.RoundedBorder()
-		b.Left = "┤"
-		return titleStyle.BorderStyle(b).
-			Foreground(lipgloss.Color("205")).
-			BorderForeground(lipgloss.Color("205"))
-	}()
-)
-
 func (m *model) docUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:

@@ -9,64 +9,11 @@ import (
 
 	"github.com/atotto/clipboard"
 	"github.com/charmbracelet/bubbles/list"
-	"github.com/charmbracelet/lipgloss"
 	"github.com/yashodhanketkar/arsg/db"
 	"github.com/yashodhanketkar/arsg/util"
 
 	tea "github.com/charmbracelet/bubbletea"
 )
-
-var (
-	defaultStyle        = lipgloss.NewStyle().Margin(1, 2)
-	focusedStyle        = lipgloss.NewStyle().Foreground(lipgloss.Color("205"))
-	blurredStyle        = lipgloss.NewStyle().Foreground(lipgloss.Color("240"))
-	cursorStyle         = focusedStyle
-	noStyle             = lipgloss.NewStyle()
-	helpStyle           = blurredStyle
-	cursorModeHelpStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("244"))
-	keymapStyle         = lipgloss.NewStyle().Border(lipgloss.RoundedBorder()).Padding(0, 1)
-
-	contentStyle = lipgloss.NewStyle().
-			Background(lipgloss.Color("62")).
-			Foreground(lipgloss.Color("15")).
-			Margin(1, 0).
-			Padding(0, 1)
-
-	resultStyle = lipgloss.NewStyle().
-			Foreground(lipgloss.Color("120")).
-			Background(lipgloss.Color("240")).
-			Padding(0, 1).
-			Bold(true)
-
-	focusedButtonCf  = focusedStyle.Render("[ Confirm ]")
-	focusedButtonSv  = focusedStyle.Render("[ Save ]")
-	focusedButtonEnd = focusedStyle.Render("[ End ]")
-	focusedButtonRes = focusedStyle.Render("[ Restart ]")
-
-	blurredButtonCf  = fmt.Sprintf("[ %s ]", blurredStyle.Render("Confirm"))
-	blurredButtonSv  = fmt.Sprintf("[ %s ]", blurredStyle.Render("Save"))
-	blurredButtonEnd = fmt.Sprintf("[ %s ]", blurredStyle.Render("End"))
-	blurredButtonRes = fmt.Sprintf("[ %s ]", blurredStyle.Render("Restart"))
-
-	scoreSystem = map[int]string{
-		0: "Decimal",
-		1: "Integer",
-		2: "FivePoint",
-		3: "Percentage",
-	}
-)
-
-type item struct {
-	id         int
-	title      string
-	desc       string
-	parameters [4]float32
-	score      string
-}
-
-func (i item) Title() string       { return i.title }
-func (i item) Description() string { return fmt.Sprintf("%s - %+v", i.score, i.parameters) }
-func (i item) FilterValue() string { return i.title }
 
 func (m *model) setFocus(index int) (tea.Model, tea.Cmd) {
 	cmds := make([]tea.Cmd, len(m.inputs))
@@ -241,7 +188,15 @@ func (m *model) loadDocs() string {
 }
 
 func (m *model) toggleContentType() {
-	avalCType := []string{"anime", "manga", "lightnovel"}
 	curr := m.contentType
+	// circularly iterates through the content types
 	m.contentType = avalCType[(slices.Index(avalCType, curr)+1)%len(avalCType)]
+	m.buildScoreList()
+}
+
+func (m *model) buildScoreList() {
+	// generates an array of score with respect to the current content type
+	m.ratings = list.New(resetScoreList(m.contentType),
+		list.NewDefaultDelegate(), 128, 0)
+	m.ratings.Title = "Ratings for " + m.contentType
 }

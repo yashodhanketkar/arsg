@@ -23,7 +23,7 @@ func (m *model) scoreUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		case "ctrl+t":
 			m.toggleContentType()
-			m.view = 0
+			m.view = 2
 			return m, nil
 
 		case "f3":

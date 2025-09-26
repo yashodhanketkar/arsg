@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"github.com/charmbracelet/bubbles/cursor"
-	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/yashodhanketkar/arsg/db"
 )
@@ -44,8 +43,8 @@ func (m *model) formUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, nil
 
 		case "f3":
-			m.ratings = list.New(resetScoreList(m.contentType), list.NewDefaultDelegate(), 128, 0)
-			m.ratings.Title = "Ratings for " + m.contentType
+			// builds score list for the current content type
+			m.buildScoreList()
 			m.view = 2
 			m.focusIndex = 0
 			m.setFocus(m.focusIndex)

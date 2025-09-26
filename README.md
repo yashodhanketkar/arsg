@@ -35,6 +35,7 @@ Keybinds
 | <kbd>HOME</kbd>                      | Move cursor to the first field                      |
 | <kbd>END</kbd>                       | Move cursor to the last field                       |
 | <kbd>CTRL</kbd> <kbd>c</kbd>         | Copy score to clipboard                             |
+| <kbd>CTRL</kbd> <kbd>t</kbd>         | Switch content type                                 |
 | <kbd>DEL</kbd>                       | Reset focused field                                 |
 | <kbd>ESC</kbd>                       | Reset all fields and move cursor to the first field |
 | <kbd>q</kbd>                         | Quit and exit application                           |

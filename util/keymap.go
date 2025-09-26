@@ -15,10 +15,11 @@ type KeyMap struct {
 	Home      key.Binding
 	End       key.Binding
 	Export    key.Binding
+	Content   key.Binding
 }
 
 func (k KeyMap) ShortHelp() []key.Binding {
-	return []key.Binding{k.Help, k.Up, k.Down}
+	return []key.Binding{k.Help, k.Content}
 }
 
 func (k KeyMap) FullHelp() [][]key.Binding {
@@ -26,7 +27,7 @@ func (k KeyMap) FullHelp() [][]key.Binding {
 		{k.Help, k.Up, k.Down},
 		{k.Quit, k.Copy, k.Reset},
 		{k.StartOver, k.Home, k.End},
-		{k.Export},
+		{k.Export, k.Content},
 	}
 }
 
@@ -70,5 +71,9 @@ var AppKeys = KeyMap{
 	Export: key.NewBinding(
 		key.WithKeys("ctrl+e"),
 		key.WithHelp("ctrl+e", "export ratings in json format"),
+	),
+	Content: key.NewBinding(
+		key.WithKeys("ctrl+t"),
+		key.WithHelp("ctrl+t", "switch content type"),
 	),
 }
