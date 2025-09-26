@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"slices"
 	"strconv"
 
 	"github.com/atotto/clipboard"
@@ -23,24 +24,28 @@ var (
 	noStyle             = lipgloss.NewStyle()
 	helpStyle           = blurredStyle
 	cursorModeHelpStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("244"))
+	keymapStyle         = lipgloss.NewStyle().Border(lipgloss.RoundedBorder()).Padding(0, 1)
+
+	contentStyle = lipgloss.NewStyle().
+			Background(lipgloss.Color("62")).
+			Foreground(lipgloss.Color("15")).
+			Margin(1, 0).
+			Padding(0, 1)
 
 	resultStyle = lipgloss.NewStyle().
 			Foreground(lipgloss.Color("120")).
-			Background(lipgloss.Color("240")).Padding(0, 1).Bold(true)
+			Background(lipgloss.Color("240")).
+			Padding(0, 1).
+			Bold(true)
 
-	keymapStyle = lipgloss.NewStyle().
-			Border(lipgloss.RoundedBorder()).Padding(0, 1)
-
-	focusedButtonCf = focusedStyle.Render("[ Confirm ]")
-	blurredButtonCf = fmt.Sprintf("[ %s ]", blurredStyle.Render("Confirm"))
-
-	focusedButtonSv = focusedStyle.Render("[ Save ]")
-	blurredButtonSv = fmt.Sprintf("[ %s ]", blurredStyle.Render("Save"))
-
+	focusedButtonCf  = focusedStyle.Render("[ Confirm ]")
+	focusedButtonSv  = focusedStyle.Render("[ Save ]")
 	focusedButtonEnd = focusedStyle.Render("[ End ]")
-	blurredButtonEnd = fmt.Sprintf("[ %s ]", blurredStyle.Render("End"))
-
 	focusedButtonRes = focusedStyle.Render("[ Restart ]")
+
+	blurredButtonCf  = fmt.Sprintf("[ %s ]", blurredStyle.Render("Confirm"))
+	blurredButtonSv  = fmt.Sprintf("[ %s ]", blurredStyle.Render("Save"))
+	blurredButtonEnd = fmt.Sprintf("[ %s ]", blurredStyle.Render("End"))
 	blurredButtonRes = fmt.Sprintf("[ %s ]", blurredStyle.Render("Restart"))
 
 	scoreSystem = map[int]string{
@@ -183,7 +188,7 @@ func (m model) buttonCommands() (tea.Model, tea.Cmd) {
 		if m.score >= 0.1 && m.inputs[0].Value() != "" {
 			DB := db.ConnectDB()
 			defer DB.Close()
-			db.AddRatings(DB, m.prepareRating())
+			db.AddRatings(DB, m.prepareRating(), m.contentType)
 			m.resetInputs()
 			m.view = 1
 		} else {
@@ -206,12 +211,12 @@ func (m model) buttonCommands() (tea.Model, tea.Cmd) {
 	}
 }
 
-func resetScoreList() []list.Item {
+func resetScoreList(contentType string) []list.Item {
 	ratingList := []list.Item{}
 	DB := db.ConnectDB()
 	defer DB.Close()
 
-	for _, rating := range db.ListRatings(DB) {
+	for _, rating := range db.ListRatings(DB, contentType) {
 		ratingList = append(ratingList, item{
 			id:         rating.ID,
 			title:      rating.Name,
@@ -233,4 +238,10 @@ func (m *model) loadDocs() string {
 	}
 
 	return string(content)
+}
+
+func (m *model) toggleContentType() {
+	avalCType := []string{"anime", "manga", "lightnovel"}
+	curr := m.contentType
+	m.contentType = avalCType[(slices.Index(avalCType, curr)+1)%len(avalCType)]
 }

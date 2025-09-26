@@ -39,9 +39,13 @@ func (m *model) formUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "ctrl+q":
 			return m, tea.Batch(tea.ExitAltScreen, tea.Quit)
 
+		case "ctrl+t":
+			m.toggleContentType()
+			return m, nil
+
 		case "f3":
-			m.ratings = list.New(resetScoreList(), list.NewDefaultDelegate(), 128, 0)
-			m.ratings.Title = "Media Name"
+			m.ratings = list.New(resetScoreList(m.contentType), list.NewDefaultDelegate(), 128, 0)
+			m.ratings.Title = "Ratings for " + m.contentType
 			m.view = 2
 			m.focusIndex = 0
 			m.setFocus(m.focusIndex)
@@ -145,6 +149,9 @@ func (m *model) formUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (m *model) formView() string {
 	var b strings.Builder
 	helpView := m.help.View(m.keys)
+
+	b.WriteString(contentStyle.Render("Running for " + m.contentType))
+	b.WriteString(noStyle.Render("\n"))
 
 	for i := range m.inputs {
 		b.WriteString(m.inputs[i].View())
