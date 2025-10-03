@@ -8,21 +8,18 @@ CREATE TABLE IF NOT EXISTS rating (
   rating TEXT NOT NULL,
   comments TEXT
 )
-
-CREATE TABLE IF NOT EXISTS anime {
+CREATE TABLE IF NOT EXISTS anime (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   rating_id integer NOT NULL,
-  FOREIGN KEY (rating_id) REFERENCES rating(id)
-}
-
-CREATE TABLE IF NOT EXISTS manga {
+  FOREIGN KEY (rating_id) REFERENCES rating (id)
+)
+CREATE TABLE IF NOT EXISTS manga (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   rating_id integer NOT NULL,
-  FOREIGN KEY (rating_id) REFERENCES rating(id)
-}
-
-CREATE TABLE IF NOT EXISTS lightnovel {
+  FOREIGN KEY (rating_id) REFERENCES rating (id)
+)
+CREATE TABLE IF NOT EXISTS lightnovel (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   rating_id integer NOT NULL,
-  FOREIGN KEY (rating_id) REFERENCES rating(id)
-}
+  FOREIGN KEY (rating_id) REFERENCES rating (id)
+)

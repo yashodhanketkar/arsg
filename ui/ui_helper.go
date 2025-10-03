@@ -187,11 +187,13 @@ func (m *model) loadDocs() string {
 	return string(content)
 }
 
-func (m *model) toggleContentType() {
+func (m *model) toggleContentType() string {
 	curr := m.contentType
 	// circularly iterates through the content types
 	m.contentType = avalCType[(slices.Index(avalCType, curr)+1)%len(avalCType)]
 	m.buildScoreList()
+
+	return m.contentType
 }
 
 func (m *model) buildScoreList() {
