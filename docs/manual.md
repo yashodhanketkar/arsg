@@ -85,6 +85,8 @@ Navigation key:
 
 <kbd>F1</kbd> – Opens Docs View
 
+<kbd>C-t</kbd> - Switches to content type
+
 <kbd>F3</kbd> – Returns to Main View
 
 ### Docs View
@@ -118,12 +120,16 @@ In the Main View, enter the required details in the input fields. After filling 
 
 <kbd>F1</kbd> – Switch to Docs View
 
+<kbd>C-t</kbd> - Switches to content type
+
 <kbd>F3</kbd> – Switch to Ratings View (from Main or Docs)
 
-Note: Refer to the help box at the bottom of the screen for a full list of key bindings. Support
+Note: Refer to the help box at the bottom of the screen for a full list of key bindings supported by the application.
 
 Contact
 -------
+
+Source: [ARSG](https://github.com/yashodhanketkar/arsg)
 
 Github: [yashodhan](https://github.com/yashodhanketkar/)
 

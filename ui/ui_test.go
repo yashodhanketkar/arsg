@@ -122,6 +122,20 @@ func TestHelpers(t *testing.T) {
 
 		assert.Equal(t, expected, got)
 	})
+
+	t.Run("test switch content keybind", func(t *testing.T) {
+		m := initialModel()
+
+		if m.contentType != "anime" {
+			t.Errorf("initial content type not set to anime")
+		}
+
+		for _, option := range []string{"manga", "lightnovel", "anime"} {
+			if m.toggleContentType() != option {
+				t.Errorf("content type not set to %s", option)
+			}
+		}
+	})
 }
 
 func TestButtonCommands(t *testing.T) {

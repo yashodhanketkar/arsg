@@ -14,18 +14,19 @@ import (
 )
 
 type model struct {
-	focusIndex int
-	inputs     []textinput.Model
-	cursorMode cursor.Mode
-	scoreMode  int
-	score      float32
-	help       help.Model
-	keys       util.KeyMap
-	view       int
-	ratings    list.Model
-	docs       string
-	lastview   int
-	viewport   viewport.Model
+	focusIndex  int
+	inputs      []textinput.Model
+	cursorMode  cursor.Mode
+	scoreMode   int
+	score       float32
+	help        help.Model
+	keys        util.KeyMap
+	view        int
+	ratings     list.Model
+	docs        string
+	lastview    int
+	viewport    viewport.Model
+	contentType string
 }
 
 func initialModel() model {
@@ -37,6 +38,7 @@ func initialModel() model {
 	m.keys = util.AppKeys
 	m.help = help.New()
 	m.view = 0
+	m.contentType = "anime"
 
 	var t textinput.Model
 	for i := range m.inputs {

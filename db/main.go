@@ -3,30 +3,13 @@ package db
 import (
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"log"
 	"os"
 	"path/filepath"
 
 	_ "github.com/mattn/go-sqlite3"
 )
-
-var (
-	DB *sql.DB
-
-	basePath = filepath.Join(os.Getenv("HOME"), ".local/share/args/lib")
-	dbPath   = filepath.Join(basePath, "arsg.db")
-)
-
-type Rating struct {
-	ID       int     `json:"id"`
-	Name     string  `json:"name"`
-	Art      float32 `json:"art"`
-	Support  float32 `json:"support"`
-	Plot     float32 `json:"plot"`
-	Bias     float32 `json:"bias"`
-	Rating   string  `json:"rating"`
-	Comments string  `json:"comments"`
-}
 
 func ConnectDB() *sql.DB {
 	db, err := sql.Open("sqlite3", dbPath)
@@ -53,9 +36,16 @@ func InitDB() {
 	createTables(DB, filepath.Join(basePath, "schema/arsg.sql"))
 }
 
-func AddRatings(db *sql.DB, ratings Rating) {
-	rows, err := db.Query(
+func addRating(tx *sql.Tx, ratings Rating) (int64, error) {
+	stmt, err := tx.Prepare(
 		"INSERT INTO rating (name, art, support, plot, bias, rating, comments) VALUES (?, ?, ?, ?, ?, ?, ?)",
+	)
+	if err != nil {
+		return 0, err
+	}
+	defer stmt.Close()
+
+	res, err := stmt.Exec(
 		ratings.Name,
 		ratings.Art,
 		ratings.Support,
@@ -65,15 +55,44 @@ func AddRatings(db *sql.DB, ratings Rating) {
 		ratings.Comments,
 	)
 	if err != nil {
-		log.Fatal(err)
+		return 0, err
 	}
-	defer rows.Close()
-	rows.Next()
+
+	id, err := res.LastInsertId()
+	if err != nil {
+		return 0, err
+	}
+
+	return id, nil
 }
 
-func ListRatings(db *sql.DB) []Rating {
+func addToIndex(tx *sql.Tx, id int64, contentType string) error {
+	_, err := tx.Exec("INSERT INTO "+contentType+" (rating_id) VALUES (?)", id)
+	return err
+}
+
+func AddRatings(db *sql.DB, ratings Rating, contentType string) error {
+	tx, err := db.Begin()
+	defer tx.Rollback()
+
+	id, err := addRating(tx, ratings)
+	if err != nil {
+		return err
+	}
+	addToIndex(tx, id, contentType)
+
+	return tx.Commit()
+}
+
+func ListRatings(db *sql.DB, contentType string) []Rating {
 	ratings := make([]Rating, 0)
-	rows, err := db.Query("SELECT * FROM rating ORDER BY name")
+	querySQL := fmt.Sprint(
+		"SELECT a.* FROM ",
+		contentType,
+		" AS c LEFT JOIN rating AS a ON a.id = c.rating_id ORDER BY a.name",
+	)
+
+	rows, err := db.Query(querySQL)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -111,7 +130,12 @@ func createTables(db *sql.DB, path string) {
 }
 
 func ExportData(db *sql.DB) {
-	data := ListRatings(db)
+	var data JData
+
+	data.Anime = ListRatings(db, "anime")
+	data.Manga = ListRatings(db, "manga")
+	data.LightNovel = ListRatings(db, "lightnovel")
+
 	jsonData, err := json.MarshalIndent(data, "", "  ")
 
 	if err != nil {

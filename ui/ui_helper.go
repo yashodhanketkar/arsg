@@ -4,64 +4,16 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"slices"
 	"strconv"
 
 	"github.com/atotto/clipboard"
 	"github.com/charmbracelet/bubbles/list"
-	"github.com/charmbracelet/lipgloss"
 	"github.com/yashodhanketkar/arsg/db"
 	"github.com/yashodhanketkar/arsg/util"
 
 	tea "github.com/charmbracelet/bubbletea"
 )
-
-var (
-	defaultStyle        = lipgloss.NewStyle().Margin(1, 2)
-	focusedStyle        = lipgloss.NewStyle().Foreground(lipgloss.Color("205"))
-	blurredStyle        = lipgloss.NewStyle().Foreground(lipgloss.Color("240"))
-	cursorStyle         = focusedStyle
-	noStyle             = lipgloss.NewStyle()
-	helpStyle           = blurredStyle
-	cursorModeHelpStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("244"))
-
-	resultStyle = lipgloss.NewStyle().
-			Foreground(lipgloss.Color("120")).
-			Background(lipgloss.Color("240")).Padding(0, 1).Bold(true)
-
-	keymapStyle = lipgloss.NewStyle().
-			Border(lipgloss.RoundedBorder()).Padding(0, 1)
-
-	focusedButtonCf = focusedStyle.Render("[ Confirm ]")
-	blurredButtonCf = fmt.Sprintf("[ %s ]", blurredStyle.Render("Confirm"))
-
-	focusedButtonSv = focusedStyle.Render("[ Save ]")
-	blurredButtonSv = fmt.Sprintf("[ %s ]", blurredStyle.Render("Save"))
-
-	focusedButtonEnd = focusedStyle.Render("[ End ]")
-	blurredButtonEnd = fmt.Sprintf("[ %s ]", blurredStyle.Render("End"))
-
-	focusedButtonRes = focusedStyle.Render("[ Restart ]")
-	blurredButtonRes = fmt.Sprintf("[ %s ]", blurredStyle.Render("Restart"))
-
-	scoreSystem = map[int]string{
-		0: "Decimal",
-		1: "Integer",
-		2: "FivePoint",
-		3: "Percentage",
-	}
-)
-
-type item struct {
-	id         int
-	title      string
-	desc       string
-	parameters [4]float32
-	score      string
-}
-
-func (i item) Title() string       { return i.title }
-func (i item) Description() string { return fmt.Sprintf("%s - %+v", i.score, i.parameters) }
-func (i item) FilterValue() string { return i.title }
 
 func (m *model) setFocus(index int) (tea.Model, tea.Cmd) {
 	cmds := make([]tea.Cmd, len(m.inputs))
@@ -183,7 +135,7 @@ func (m model) buttonCommands() (tea.Model, tea.Cmd) {
 		if m.score >= 0.1 && m.inputs[0].Value() != "" {
 			DB := db.ConnectDB()
 			defer DB.Close()
-			db.AddRatings(DB, m.prepareRating())
+			db.AddRatings(DB, m.prepareRating(), m.contentType)
 			m.resetInputs()
 			m.view = 1
 		} else {
@@ -206,12 +158,12 @@ func (m model) buttonCommands() (tea.Model, tea.Cmd) {
 	}
 }
 
-func resetScoreList() []list.Item {
+func resetScoreList(contentType string) []list.Item {
 	ratingList := []list.Item{}
 	DB := db.ConnectDB()
 	defer DB.Close()
 
-	for _, rating := range db.ListRatings(DB) {
+	for _, rating := range db.ListRatings(DB, contentType) {
 		ratingList = append(ratingList, item{
 			id:         rating.ID,
 			title:      rating.Name,
@@ -233,4 +185,20 @@ func (m *model) loadDocs() string {
 	}
 
 	return string(content)
+}
+
+func (m *model) toggleContentType() string {
+	curr := m.contentType
+	// circularly iterates through the content types
+	m.contentType = avalCType[(slices.Index(avalCType, curr)+1)%len(avalCType)]
+	m.buildScoreList()
+
+	return m.contentType
+}
+
+func (m *model) buildScoreList() {
+	// generates an array of score with respect to the current content type
+	m.ratings = list.New(resetScoreList(m.contentType),
+		list.NewDefaultDelegate(), 128, 0)
+	m.ratings.Title = "Ratings for " + m.contentType
 }

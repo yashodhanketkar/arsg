@@ -13,8 +13,8 @@ start:
 startclean: build
 	@./build/arsg
 
-build: clean 
-	@go build -o ./build/arsg
+build: 
+	@go build -o ./build/arsg ./main/main.go
 
 install: build
 	@chmod a+x ./install.sh

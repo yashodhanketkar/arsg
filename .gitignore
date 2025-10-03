@@ -29,7 +29,7 @@ go.work.sum
 coverage.out
 
 # Database files
-args.db
+arsg.db
 
 # Binary build output
 bin/
@@ -47,3 +47,5 @@ Thumbs.db
 
 # Local files
 export.json
+backup/
+dev/
