@@ -153,6 +153,20 @@ func TestButtonCommands(t *testing.T) {
 		}
 	})
 
+	t.Run("test save button", func(t *testing.T) {
+		m := initialModel()
+		mockValue(t, m)
+		m.calculateScore()
+		m.focusIndex = len(m.inputs)
+
+		_, cmd := m.buttonCommands()
+		assert.Nil(t, cmd)
+
+		v, err := clipboard.ReadAll()
+		assert.Nil(t, err)
+		assert.Equal(t, "6.8", v)
+	})
+
 	t.Run("test reset button", func(t *testing.T) {
 		m := initialModel()
 		mockValue(t, m)

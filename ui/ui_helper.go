@@ -136,6 +136,7 @@ func (m model) buttonCommands() (tea.Model, tea.Cmd) {
 			DB := db.ConnectDB()
 			defer DB.Close()
 			db.AddRatings(DB, m.prepareRating(), m.contentType)
+			m.copyToClipboard()
 			m.resetInputs()
 			m.view = 1
 		} else {

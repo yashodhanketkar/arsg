@@ -13,7 +13,7 @@ start:
 startclean: build
 	@./build/arsg
 
-build: 
+build: test
 	@go build -o ./build/arsg ./main/main.go
 
 install: build
