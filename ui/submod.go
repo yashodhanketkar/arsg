@@ -5,9 +5,116 @@ import (
 	"strings"
 
 	"github.com/charmbracelet/bubbles/cursor"
+	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 	"github.com/yashodhanketkar/arsg/db"
 )
+
+// INFO: Confirm submod
+
+func (m *model) confirmUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
+	switch msg := msg.(type) {
+	case tea.KeyMsg:
+		switch msg.String() {
+		case "ctrl+c":
+			return m, tea.Batch(tea.ExitAltScreen, tea.Quit)
+
+		case "f1":
+			m.lastview = m.view
+			m.view = 3
+			return m, nil
+
+		case "enter", " ":
+			m.view = 0
+			return m, nil
+		}
+	}
+
+	return m, nil
+}
+
+func (m *model) confirmView() string {
+	var b strings.Builder
+
+	confirmButton := &focusedButtonCf
+	b.WriteString("Ratings saved successfully!\n")
+	fmt.Fprintf(&b, "\n%s\n", *confirmButton)
+
+	return defaultStyle.Render(b.String())
+}
+
+// INFO: Doc submod
+
+func (m *model) docUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
+	switch msg := msg.(type) {
+	case tea.WindowSizeMsg:
+		headerHeight := lipgloss.Height(m.headerView())
+		footerHeight := lipgloss.Height(m.footerView())
+		margins := headerHeight + footerHeight
+
+		m.viewport = viewport.New(msg.Width, msg.Height-margins)
+		m.viewport.YPosition = headerHeight
+
+		_, cmd := m.viewport.Update(msg)
+
+		return m, cmd
+
+	case tea.KeyMsg:
+		switch msg.String() {
+		case "ctrl+c", "q":
+			return m, tea.Batch(tea.ExitAltScreen, tea.Quit)
+
+		case "j":
+			m.viewport.LineDown(1)
+
+		case "d":
+			m.viewport.HalfViewUp()
+
+		case "k":
+			m.viewport.LineUp(1)
+
+		case "u":
+			m.viewport.HalfViewDown()
+
+		case "home":
+			m.viewport.GotoTop()
+
+		case "end":
+			m.viewport.GotoBottom()
+
+		case "enter", "f1":
+			m.view = m.lastview
+			return m, nil
+		}
+	}
+
+	return m, nil
+}
+
+func (m *model) docView() string {
+	var b strings.Builder
+
+	b.WriteString(m.headerView() + "\n")
+	b.WriteString(m.viewport.View())
+	b.WriteString("\n" + m.footerView())
+
+	return b.String()
+}
+
+func (m model) headerView() string {
+	title := titleStyle.Render("ARGS")
+	line := focusedStyle.Render(strings.Repeat("─", max(0, m.viewport.Width-lipgloss.Width(title))))
+	return lipgloss.JoinHorizontal(lipgloss.Center, title, line)
+}
+
+func (m model) footerView() string {
+	info := infoStyle.Render(fmt.Sprintf("%3.f%%", m.viewport.ScrollPercent()*100))
+	line := focusedStyle.Render(strings.Repeat("─", max(0, m.viewport.Width-lipgloss.Width(info))))
+	return lipgloss.JoinHorizontal(lipgloss.Center, line, info)
+}
+
+// INFO: Form submod
 
 func (m *model) formUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
@@ -140,6 +247,7 @@ func (m *model) formUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	// Handle character input and blinking
 	cmd := m.updateInputs(msg)
+
 	m.calculateScore()
 
 	return m, cmd
@@ -198,4 +306,45 @@ func (m *model) formView() string {
 	)
 
 	return defaultStyle.Render(b.String())
+}
+
+// INFO: Score submod
+
+func (m *model) scoreUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
+	switch msg := msg.(type) {
+	case tea.WindowSizeMsg:
+		m.ratings.SetWidth(128)
+
+	case tea.KeyMsg:
+		switch msg.String() {
+		case "ctrl+c", "q":
+			return m, tea.Batch(tea.ExitAltScreen, tea.Quit)
+
+		case "f1":
+			m.lastview = m.view
+			m.view = 3
+			return m, nil
+
+		case "ctrl+t":
+			m.toggleContentType()
+			m.view = 2
+			return m, nil
+
+		case "f3":
+			m.view = 0
+			return m, nil
+		}
+	}
+
+	var cmd tea.Cmd
+	m.ratings, cmd = m.ratings.Update(msg)
+
+	return m, cmd
+}
+
+func (m *model) scoreView() string {
+	var b strings.Builder
+	b.WriteString(defaultStyle.Render(m.ratings.View()))
+
+	return b.String()
 }

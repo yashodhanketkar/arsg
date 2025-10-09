@@ -24,13 +24,13 @@ func Input(valueType string) float32 {
 	}
 }
 
-func GetParameters() [4]float32 {
+func GetParameters() []float32 {
 	art := Input("Art")
 	plot := Input("Plot")
 	characters := Input("Characters")
 	bias := Input("Bias")
 
-	return [4]float32{art, plot, characters, bias}
+	return []float32{art, plot, characters, bias}
 }
 
 func GetNumericInput(str string) string {
