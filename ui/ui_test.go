@@ -10,8 +10,14 @@ import (
 	"github.com/yashodhanketkar/arsg/db"
 )
 
+func helperInitilizeModel(t *testing.T, args ...string) model {
+	t.Helper()
+	userParameters = setupParameters(args...)
+	return initialModel()
+}
+
 func TestInit(t *testing.T) {
-	m := initialModel()
+	m := helperInitilizeModel(t)
 	assert.IsType(t, model{}, m)
 	cmd := m.Init()
 	_, ok := cmd().(tea.BatchMsg)
@@ -35,7 +41,7 @@ func TestInit(t *testing.T) {
 
 func TestHelpers(t *testing.T) {
 	t.Run("test setFocus", func(t *testing.T) {
-		m := initialModel()
+		m := helperInitilizeModel(t)
 		assert.NotEqual(t, focusedStyle, m.inputs[1].PromptStyle)
 		assert.Equal(t, m.focusIndex, 0)
 		m.setFocus(1)
@@ -43,7 +49,7 @@ func TestHelpers(t *testing.T) {
 	})
 
 	t.Run("test isNumeric", func(t *testing.T) {
-		m := initialModel()
+		m := helperInitilizeModel(t)
 		m.focusIndex = 6
 		assert.False(t, m.isNumeric())
 		m.focusIndex = 1
@@ -51,7 +57,7 @@ func TestHelpers(t *testing.T) {
 	})
 
 	t.Run("test resetInputs", func(t *testing.T) {
-		m := initialModel()
+		m := helperInitilizeModel(t)
 		mockValue(t, m)
 		m.calculateScore() // set m.score to 6.8
 		m.resetInputs()
@@ -64,7 +70,7 @@ func TestHelpers(t *testing.T) {
 	})
 
 	t.Run("test calculateScore", func(t *testing.T) {
-		m := initialModel()
+		m := helperInitilizeModel(t)
 		mockValue(t, m)
 
 		// check correct score
@@ -88,7 +94,7 @@ func TestHelpers(t *testing.T) {
 	})
 
 	t.Run("test scoreToClipboard", func(t *testing.T) {
-		m := initialModel()
+		m := helperInitilizeModel(t)
 		mockValue(t, m)
 		m.calculateScore()
 		m.copyToClipboard()
@@ -100,12 +106,12 @@ func TestHelpers(t *testing.T) {
 	})
 
 	t.Run("test updateInputs", func(t *testing.T) {
-		m := initialModel()
+		m := helperInitilizeModel(t)
 		m.updateInputs(tea.KeyMsg{Type: tea.KeyEnter})
 	})
 
 	t.Run("test prepare ratings", func(t *testing.T) {
-		m := initialModel()
+		m := helperInitilizeModel(t)
 		mockValue(t, m)
 		m.calculateScore()
 		got := m.prepareRating()
@@ -124,7 +130,7 @@ func TestHelpers(t *testing.T) {
 	})
 
 	t.Run("test switch content keybind", func(t *testing.T) {
-		m := initialModel()
+		m := helperInitilizeModel(t)
 
 		if m.contentType != "anime" {
 			t.Errorf("initial content type not set to anime")
@@ -141,7 +147,7 @@ func TestHelpers(t *testing.T) {
 func TestButtonCommands(t *testing.T) {
 
 	t.Run("test default behaviour", func(t *testing.T) {
-		m := initialModel()
+		m := helperInitilizeModel(t)
 		nm, cmd := m.buttonCommands()
 		assert.Nil(t, cmd)
 
@@ -154,7 +160,7 @@ func TestButtonCommands(t *testing.T) {
 	})
 
 	t.Run("test save button", func(t *testing.T) {
-		m := initialModel()
+		m := helperInitilizeModel(t)
 		mockValue(t, m)
 		m.calculateScore()
 		m.focusIndex = len(m.inputs)
@@ -168,7 +174,7 @@ func TestButtonCommands(t *testing.T) {
 	})
 
 	t.Run("test reset button", func(t *testing.T) {
-		m := initialModel()
+		m := helperInitilizeModel(t)
 		mockValue(t, m)
 		m.calculateScore()
 		m.focusIndex = len(m.inputs) + 1
@@ -184,7 +190,7 @@ func TestButtonCommands(t *testing.T) {
 		}
 
 		t.Run("test quit button", func(t *testing.T) {
-			m := initialModel()
+			m := helperInitilizeModel(t)
 			m.focusIndex = len(m.inputs) + 2
 			_, cmd := m.buttonCommands()
 			_, ok := cmd().(tea.QuitMsg)
