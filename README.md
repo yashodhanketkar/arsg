@@ -97,8 +97,8 @@ TODO
 
 ### Phase 1
 
--	[X] Build a simple 4-parameter scoring system, with bias as the fourth parameter. (Completed)
--	[X] Create test cases and a score converter for sites based on user preferences. (Completed)
+-	[X] Build a simple 4-parameter scoring system, with bias as the fourth parameter.
+-	[X] Create test cases and a score converter for sites based on user preferences.
 
 ### Phase 2
 

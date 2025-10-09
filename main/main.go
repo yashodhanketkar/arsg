@@ -16,7 +16,7 @@ func mainLoop() []float32 {
 		choice = "N"
 		parameters := util.GetParameters()
 
-		if score, err := util.Calculator(parameters); err == nil {
+		if score, err := util.Calculator(parameters...); err == nil {
 			res = append(res, util.SystemCalculator("Decimal", score))
 			fmt.Printf("Generated rating for this item is %v\n", score)
 		}

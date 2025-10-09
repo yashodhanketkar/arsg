@@ -13,6 +13,8 @@ import (
 	"github.com/yashodhanketkar/arsg/util"
 )
 
+var userParameters []string
+
 type model struct {
 	focusIndex  int
 	inputs      []textinput.Model
@@ -30,8 +32,9 @@ type model struct {
 }
 
 func initialModel() model {
+	parameters := userParameters
 	m := model{
-		inputs: make([]textinput.Model, 6),
+		inputs: make([]textinput.Model, len(parameters)+2),
 	}
 
 	m.scoreMode = 0
@@ -53,20 +56,13 @@ func initialModel() model {
 			t.Focus()
 			t.PromptStyle = focusedStyle
 			t.TextStyle = focusedStyle
-		case 1:
-			t.Placeholder = "Art/Animation"
-			t.CharLimit = 5
-		case 2:
-			t.Placeholder = "Character/Cast"
-			t.CharLimit = 5
-		case 3:
-			t.Placeholder = "Plot"
-			t.CharLimit = 5
-		case 4:
-			t.Placeholder = "Bias"
-			t.CharLimit = 5
-		case 5:
+
+		case len(parameters) + 1:
 			t.Placeholder = "Comments"
+
+		default:
+			t.Placeholder = (parameters)[i-1]
+			t.CharLimit = 5
 		}
 
 		m.inputs[i] = t
@@ -116,7 +112,9 @@ func (m model) View() (view string) {
 	return view
 }
 
-func TeaUI() {
+func TeaUI(args ...string) {
+	userParameters = setupParameters(args...)
+
 	if _, err := tea.NewProgram(initialModel()).Run(); err != nil {
 		fmt.Printf("could not start program: %s\n", err)
 		os.Exit(1)
