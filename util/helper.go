@@ -1,34 +1,47 @@
 package util
 
 import (
+	"encoding/json"
 	"fmt"
+	"os"
+	"path/filepath"
 	"unicode"
 )
 
-func HelperHandler(handler int, args ...string) any {
-	switch handler {
-	case 1:
-		return getParams(args...)
-	case 2:
-		val, err := capitalizeFirstLetter(args...)
-		if err != nil {
-			return err
+type ParamType map[string]int
+
+type ConfigType struct {
+	Parameters []ParamType `json:"parameters"`
+}
+
+var defaultConfigParams = []ParamType{
+	{"Art/Animation": 25},
+	{"Character/Cast": 30},
+	{"Plot": 35},
+	{"Bias": 10},
+}
+
+func GetParams(config *ConfigType) []string {
+	if len(config.Parameters) == 0 {
+		config.Parameters = defaultConfigParams
+	}
+
+	return paramsTitleList(config.Parameters)
+}
+
+func paramsTitleList(args []ParamType) []string {
+	var params = make([]string, 0)
+
+	for _, p := range args {
+		for k := range p {
+			params = append(params, k)
 		}
-		return val
-	default:
-		return nil
-	}
-}
-
-func getParams(args ...string) []string {
-	if len(args) == 0 {
-		return []string{"Art/Animation", "Character/Cast", "Plot", "Bias"}
 	}
 
-	return args
+	return params
 }
 
-func capitalizeFirstLetter(args ...string) (string, error) {
+func CapitalizeFirstLetter(args ...string) (string, error) {
 	if len(args) == 0 {
 		return "", fmt.Errorf("No arguments provided")
 	}
@@ -42,4 +55,30 @@ func capitalizeFirstLetter(args ...string) (string, error) {
 	runes[0] = unicode.ToUpper(runes[0])
 
 	return string(runes), nil
+}
+
+func LoadConfig(config *ConfigType) {
+	var params = make([]string, 0)
+	configPath := filepath.Join(os.Getenv("HOME"), ".config", "arsg", "config.json")
+
+	file, err := os.ReadFile(configPath)
+	if err != nil {
+		fmt.Println("could not open config file:", err)
+		os.Exit(1)
+	}
+
+	if err = json.Unmarshal(file, &config); err != nil {
+		fmt.Println("could not unmarshal config file:", err)
+	}
+
+	if len(config.Parameters) == 0 {
+		config.Parameters = defaultConfigParams
+		return
+	}
+
+	for _, p := range config.Parameters {
+		for k := range p {
+			params = append(params, k)
+		}
+	}
 }

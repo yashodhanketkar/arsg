@@ -9,77 +9,100 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestHelperHandler(t *testing.T) {
-	t.Run("test get parameters", func(t *testing.T) {
-		tests := []struct {
-			name    string
-			handler int
-			args    []string
-			want    any
-		}{
-			{
-				name:    "Get nil",
-				handler: 0,
-				args:    []string{},
-				want:    nil,
-			},
-			{
-				name:    "Get params default",
-				handler: 1,
-				args:    []string{},
-				want:    []string{"Art/Animation", "Character/Cast", "Plot", "Bias"},
-			},
-			{
-				name:    "Get params via args",
-				handler: 1,
-				args:    []string{"studio", "genre"},
-				want:    []string{"studio", "genre"},
-			},
-		}
+func TestGetParams(t *testing.T) {
 
-		for _, tt := range tests {
-			got := HelperHandler(tt.handler, tt.args...)
-			assert.Equal(t, tt.want, got)
+	tests := []struct {
+		name   string
+		args   []string
+		want   any
+		config ConfigType
+	}{
+		{
+			name:   "Get params default",
+			want:   []string{"Art/Animation", "Character/Cast", "Plot", "Bias"},
+			config: ConfigType{},
+		},
+		{
+			name: "Get params via args",
+			want: []string{"studio", "genre"},
+			config: ConfigType{
+				Parameters: []ParamType{{"studio": 1}, {"genre": 1}},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		got := GetParams(&tt.config)
+		assert.Equal(t, tt.want, got)
+	}
+}
+
+func TestCapitalizeFirstLetter(t *testing.T) {
+	tests := []struct {
+		name string
+		args []string
+		want any
+		err  error
+	}{
+		{
+			name: "no args provided",
+			args: []string{},
+			want: "",
+			err:  fmt.Errorf("No arguments provided"),
+		},
+		{
+			name: "empty string",
+			args: []string{""},
+			want: "",
+			err:  nil,
+		},
+		{
+			name: "single character string",
+			args: []string{"a"},
+			want: "A",
+			err:  nil,
+		},
+		{
+			name: "mulit-character string",
+			args: []string{"abcd"},
+			want: "Abcd",
+			err:  nil,
+		},
+	}
+
+	for _, tt := range tests {
+		got, err := CapitalizeFirstLetter(tt.args...)
+		assert.Equal(t, tt.err, err)
+		assert.Equal(t, tt.want, got)
+	}
+}
+
+func TestReadParams(t *testing.T) {
+	t.Run("test readParams - custom parameters", func(t *testing.T) {
+		var config ConfigType
+		LoadConfig(&config)
+
+		expectedParam := []ParamType{
+			{"art": 25},
+			{"plot": 35},
+			{"character": 30},
+			{"bias": 10},
 		}
+		expectedParamList := []string{"art", "plot", "character", "bias"}
+		actualParamList := GetParams(&config)
+
+		assert.Equal(t, expectedParam, config.Parameters)
+		assert.Equal(t, expectedParamList, actualParamList)
 	})
 
-	t.Run("test capitalizeFirstLetter", func(t *testing.T) {
-		tests := []struct {
-			name    string
-			handler int
-			args    []string
-			want    any
-		}{
-			{
-				name:    "no args provided",
-				handler: 2,
-				args:    []string{},
-				want:    fmt.Errorf("No arguments provided"),
-			},
-			{
-				name:    "empty string",
-				handler: 2,
-				args:    []string{""},
-				want:    "",
-			},
-			{
-				name:    "single character string",
-				handler: 2,
-				args:    []string{"a"},
-				want:    "A",
-			},
-			{
-				name:    "mulit-character string",
-				handler: 2,
-				args:    []string{"abcd"},
-				want:    "Abcd",
-			},
-		}
+	t.Run("test readParams - default parameters", func(t *testing.T) {
+		var config ConfigType = ConfigType{}
 
-		for _, tt := range tests {
-			got := HelperHandler(tt.handler, tt.args...)
-			assert.Equal(t, tt.want, got)
-		}
+		expectedParamList := []string{"Art/Animation", "Character/Cast", "Plot", "Bias"}
+		actualParamList := GetParams(&config)
+
+		assert.Equal(t, defaultConfigParams, config.Parameters)
+		assert.Equal(t, expectedParamList, actualParamList)
 	})
 }
 

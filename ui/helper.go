@@ -285,5 +285,15 @@ func setupParameters(args ...string) []string {
 	if len(args) == 0 {
 		return []string{"Art/Animation", "Character/Cast", "Plot", "Bias"}
 	}
+
+	for i, arg := range args {
+		val, err := util.CapitalizeFirstLetter(arg)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		args[i] = val
+	}
+
 	return args
 }
