@@ -1,7 +1,7 @@
 package util
 
 import (
-	"errors"
+	"fmt"
 	"math"
 )
 
@@ -13,17 +13,36 @@ func adjuster(score float32) float32 {
 	return rounder((score / 10) * 9.4)
 }
 
-func Calculator(args ...float32) (float32, error) {
-	art := args[0]
-	plot := args[1]
-	characters := args[2]
-	bias := args[3]
-
-	if art == 0 && plot == 0 && characters == 0 && bias == 0 {
-		return 0, errors.New("Invalid input")
+func Calculator(config *ConfigType, args ...float32) (float32, error) {
+	if len(args) == 0 {
+		return 0, fmt.Errorf("No input values provided")
 	}
 
-	score := float32(art*25+plot*35+characters*30+bias*10) / 100
+	_, weights := GetParams(config)
+	if len(weights) != len(args) {
+		return 0, fmt.Errorf(
+			"Invalid number of inputs provided. %d[len(args)] != %d[len(weights)]",
+			len(args), len(weights),
+		)
+	}
 
-	return adjuster(score), nil
+	var (
+		wightedSum float32
+		maxTotal   float32
+		hasValue   bool
+	)
+
+	for i, arg := range args {
+		if arg != 0 {
+			hasValue = true
+		}
+		wightedSum += (args[i] * float32(weights[i]))
+		maxTotal += float32(weights[i])
+	}
+
+	if !hasValue {
+		return 0, fmt.Errorf("All zero values provided")
+	}
+
+	return adjuster(wightedSum / maxTotal), nil
 }

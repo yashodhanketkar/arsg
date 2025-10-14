@@ -9,81 +9,109 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestHelperHandler(t *testing.T) {
-	t.Run("test get parameters", func(t *testing.T) {
-		tests := []struct {
-			name    string
-			handler int
-			args    []string
-			want    any
-		}{
-			{
-				name:    "Get nil",
-				handler: 0,
-				args:    []string{},
-				want:    nil,
-			},
-			{
-				name:    "Get params default",
-				handler: 1,
-				args:    []string{},
-				want:    []string{"Art/Animation", "Character/Cast", "Plot", "Bias"},
-			},
-			{
-				name:    "Get params via args",
-				handler: 1,
-				args:    []string{"studio", "genre"},
-				want:    []string{"studio", "genre"},
-			},
-		}
+func TestGetParams(t *testing.T) {
 
-		for _, tt := range tests {
-			got := HelperHandler(tt.handler, tt.args...)
-			assert.Equal(t, tt.want, got)
+	tests := []struct {
+		name        string
+		args        []string
+		wantParams  []string
+		wantWeights []int
+		config      ConfigType
+	}{
+		{
+			name:        "Get params default",
+			wantParams:  []string{"Art/Animation", "Character/Cast", "Plot", "Bias"},
+			wantWeights: []int{25, 30, 35, 10},
+			config:      ConfigType{},
+		},
+		{
+			name:        "Get params via args",
+			wantParams:  []string{"studio", "genre"},
+			wantWeights: []int{1, 1},
+			config: ConfigType{
+				Parameters: []ParamType{{"studio": 1}, {"genre": 1}},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		gotParams, gotWeights := GetParams(&tt.config)
+		assert.Equal(t, tt.wantParams, gotParams)
+		assert.Equal(t, tt.wantWeights, gotWeights)
+	}
+}
+
+func TestCapitalizeFirstLetter(t *testing.T) {
+	tests := []struct {
+		name string
+		args []string
+		want any
+		err  error
+	}{
+		{
+			name: "no args provided",
+			args: []string{},
+			want: "",
+			err:  fmt.Errorf("No arguments provided"),
+		},
+		{
+			name: "empty string",
+			args: []string{""},
+			want: "",
+			err:  nil,
+		},
+		{
+			name: "single character string",
+			args: []string{"a"},
+			want: "A",
+			err:  nil,
+		},
+		{
+			name: "mulit-character string",
+			args: []string{"abcd"},
+			want: "Abcd",
+			err:  nil,
+		},
+	}
+
+	for _, tt := range tests {
+		got, err := CapitalizeFirstLetter(tt.args...)
+		assert.Equal(t, tt.err, err)
+		assert.Equal(t, tt.want, got)
+	}
+}
+
+func TestReadParams(t *testing.T) {
+	t.Run("test readParams - custom parameters", func(t *testing.T) {
+		var config ConfigType
+		LoadConfig(&config)
+
+		expectedParam := []ParamType{
+			{"art": 25},
+			{"plot": 35},
+			{"character": 30},
+			{"bias": 10},
 		}
+		expectedParamList := []string{"art", "plot", "character", "bias"}
+		actualParamList, _ := GetParams(&config)
+
+		assert.Equal(t, expectedParam, config.Parameters)
+		assert.Equal(t, expectedParamList, actualParamList)
 	})
 
-	t.Run("test capitalizeFirstLetter", func(t *testing.T) {
-		tests := []struct {
-			name    string
-			handler int
-			args    []string
-			want    any
-		}{
-			{
-				name:    "no args provided",
-				handler: 2,
-				args:    []string{},
-				want:    fmt.Errorf("No arguments provided"),
-			},
-			{
-				name:    "empty string",
-				handler: 2,
-				args:    []string{""},
-				want:    "",
-			},
-			{
-				name:    "single character string",
-				handler: 2,
-				args:    []string{"a"},
-				want:    "A",
-			},
-			{
-				name:    "mulit-character string",
-				handler: 2,
-				args:    []string{"abcd"},
-				want:    "Abcd",
-			},
-		}
+	t.Run("test readParams - default parameters", func(t *testing.T) {
+		var config ConfigType = ConfigType{}
 
-		for _, tt := range tests {
-			got := HelperHandler(tt.handler, tt.args...)
-			assert.Equal(t, tt.want, got)
-		}
+		expectedParamList := []string{"Art/Animation", "Character/Cast", "Plot", "Bias"}
+		actualParamList, _ := GetParams(&config)
+
+		assert.Equal(t, defaultConfigParams, config.Parameters)
+		assert.Equal(t, expectedParamList, actualParamList)
 	})
 }
 
 func TestCalculator(t *testing.T) {
+	config := mockConfig(t)
 
 	t.Run("should adjust and round the score", func(t *testing.T) {
 
@@ -125,7 +153,7 @@ func TestCalculator(t *testing.T) {
 	})
 
 	t.Run("should throw error", func(t *testing.T) {
-		_, err := Calculator([]float32{0, 0, 0, 0}...)
+		_, err := Calculator(&config, []float32{0, 0, 0, 0}...)
 
 		if err == nil {
 			t.Error("should throw error")
@@ -138,12 +166,11 @@ func TestCalculator(t *testing.T) {
 			parameters []float32
 			want       float32
 		}{
-			{[]float32{5, 6, 3, 1}, 4.1},
-			{[]float32{10, 10, 10, 10}, 9.4},
+			{[]float32{5, 6, 3, 1}, 4.1}, {[]float32{10, 10, 10, 10}, 9.4},
 		}
 
 		for _, tt := range calculatorTests {
-			got, _ := Calculator(tt.parameters...)
+			got, _ := Calculator(&config, tt.parameters...)
 
 			if got != tt.want {
 				t.Errorf("want %f, got %f", tt.want, got)
@@ -350,4 +377,18 @@ func TestGetNumericInput(t *testing.T) {
 			t.Errorf("[%d] want %v; got %v", i+1, want, got)
 		}
 	}
+}
+
+func mockConfig(t *testing.T) ConfigType {
+	t.Helper()
+	config := ConfigType{
+		Parameters: []ParamType{
+			{"art": 25},
+			{"plot": 35},
+			{"character": 30},
+			{"bias": 10},
+		},
+	}
+
+	return config
 }

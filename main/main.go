@@ -11,12 +11,14 @@ import (
 func mainLoop() []float32 {
 	choice := "Y"
 	var res []float32
+	config := util.ConfigType{}
+	util.LoadConfig(&config)
 
 	for choice == "Y" || choice == "y" {
 		choice = "N"
 		parameters := util.GetParameters()
 
-		if score, err := util.Calculator(parameters...); err == nil {
+		if score, err := util.Calculator(&config, parameters...); err == nil {
 			res = append(res, util.SystemCalculator("Decimal", score))
 			fmt.Printf("Generated rating for this item is %v\n", score)
 		}
