@@ -21,24 +21,26 @@ var defaultConfigParams = []ParamType{
 	{"Bias": 10},
 }
 
-func GetParams(config *ConfigType) []string {
+func GetParams(config *ConfigType) ([]string, []int) {
 	if len(config.Parameters) == 0 {
 		config.Parameters = defaultConfigParams
 	}
 
-	return paramsTitleList(config.Parameters)
+	return paramLists(config.Parameters)
 }
 
-func paramsTitleList(args []ParamType) []string {
+func paramLists(args []ParamType) ([]string, []int) {
 	var params = make([]string, 0)
+	var weights = make([]int, 0)
 
 	for _, p := range args {
-		for k := range p {
+		for k, v := range p {
 			params = append(params, k)
+			weights = append(weights, v)
 		}
 	}
 
-	return params
+	return params, weights
 }
 
 func CapitalizeFirstLetter(args ...string) (string, error) {

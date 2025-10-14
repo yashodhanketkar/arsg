@@ -12,19 +12,22 @@ import (
 func TestGetParams(t *testing.T) {
 
 	tests := []struct {
-		name   string
-		args   []string
-		want   any
-		config ConfigType
+		name        string
+		args        []string
+		wantParams  []string
+		wantWeights []int
+		config      ConfigType
 	}{
 		{
-			name:   "Get params default",
-			want:   []string{"Art/Animation", "Character/Cast", "Plot", "Bias"},
-			config: ConfigType{},
+			name:        "Get params default",
+			wantParams:  []string{"Art/Animation", "Character/Cast", "Plot", "Bias"},
+			wantWeights: []int{25, 30, 35, 10},
+			config:      ConfigType{},
 		},
 		{
-			name: "Get params via args",
-			want: []string{"studio", "genre"},
+			name:        "Get params via args",
+			wantParams:  []string{"studio", "genre"},
+			wantWeights: []int{1, 1},
 			config: ConfigType{
 				Parameters: []ParamType{{"studio": 1}, {"genre": 1}},
 			},
@@ -32,8 +35,9 @@ func TestGetParams(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		got := GetParams(&tt.config)
-		assert.Equal(t, tt.want, got)
+		gotParams, gotWeights := GetParams(&tt.config)
+		assert.Equal(t, tt.wantParams, gotParams)
+		assert.Equal(t, tt.wantWeights, gotWeights)
 	}
 }
 
@@ -89,7 +93,7 @@ func TestReadParams(t *testing.T) {
 			{"bias": 10},
 		}
 		expectedParamList := []string{"art", "plot", "character", "bias"}
-		actualParamList := GetParams(&config)
+		actualParamList, _ := GetParams(&config)
 
 		assert.Equal(t, expectedParam, config.Parameters)
 		assert.Equal(t, expectedParamList, actualParamList)
@@ -99,7 +103,7 @@ func TestReadParams(t *testing.T) {
 		var config ConfigType = ConfigType{}
 
 		expectedParamList := []string{"Art/Animation", "Character/Cast", "Plot", "Bias"}
-		actualParamList := GetParams(&config)
+		actualParamList, _ := GetParams(&config)
 
 		assert.Equal(t, defaultConfigParams, config.Parameters)
 		assert.Equal(t, expectedParamList, actualParamList)
@@ -107,6 +111,7 @@ func TestReadParams(t *testing.T) {
 }
 
 func TestCalculator(t *testing.T) {
+	config := mockConfig(t)
 
 	t.Run("should adjust and round the score", func(t *testing.T) {
 
@@ -148,7 +153,7 @@ func TestCalculator(t *testing.T) {
 	})
 
 	t.Run("should throw error", func(t *testing.T) {
-		_, err := Calculator([]float32{0, 0, 0, 0}...)
+		_, err := Calculator(&config, []float32{0, 0, 0, 0}...)
 
 		if err == nil {
 			t.Error("should throw error")
@@ -161,12 +166,11 @@ func TestCalculator(t *testing.T) {
 			parameters []float32
 			want       float32
 		}{
-			{[]float32{5, 6, 3, 1}, 4.1},
-			{[]float32{10, 10, 10, 10}, 9.4},
+			{[]float32{5, 6, 3, 1}, 4.1}, {[]float32{10, 10, 10, 10}, 9.4},
 		}
 
 		for _, tt := range calculatorTests {
-			got, _ := Calculator(tt.parameters...)
+			got, _ := Calculator(&config, tt.parameters...)
 
 			if got != tt.want {
 				t.Errorf("want %f, got %f", tt.want, got)
@@ -373,4 +377,18 @@ func TestGetNumericInput(t *testing.T) {
 			t.Errorf("[%d] want %v; got %v", i+1, want, got)
 		}
 	}
+}
+
+func mockConfig(t *testing.T) ConfigType {
+	t.Helper()
+	config := ConfigType{
+		Parameters: []ParamType{
+			{"art": 25},
+			{"plot": 35},
+			{"character": 30},
+			{"bias": 10},
+		},
+	}
+
+	return config
 }

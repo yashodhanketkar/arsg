@@ -150,11 +150,13 @@ func (m *model) updateInputs(msg tea.Msg) tea.Cmd {
 }
 
 func (m *model) calculateScore() {
-	parameters := make([]float32, len(m.inputs))
+	config := util.ConfigType{}
+	util.LoadConfig(&config)
+	parameters := make([]float32, len(m.inputs)-2)
 	allValid := true
 
 	for i := range m.inputs {
-		if i == 0 || i == 5 {
+		if i == 0 || i == len(config.Parameters)+1 {
 			continue
 		}
 
@@ -170,7 +172,7 @@ func (m *model) calculateScore() {
 	}
 
 	if allValid {
-		if score, err := util.Calculator(parameters...); err == nil {
+		if score, err := util.Calculator(&config, parameters...); err == nil {
 			m.score = util.SystemCalculator(scoreSystem[m.scoreMode], score)
 		} else {
 			m.score = 0
