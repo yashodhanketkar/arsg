@@ -9,6 +9,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/yashodhanketkar/arsg/db"
+	"github.com/yashodhanketkar/arsg/util"
 )
 
 // INFO: Confirm submod
@@ -117,6 +118,9 @@ func (m model) footerView() string {
 // INFO: Form submod
 
 func (m *model) formUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
+	config := util.ConfigType{}
+	util.LoadConfig(&config)
+
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
@@ -130,7 +134,7 @@ func (m *model) formUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
 			func() {
 				DB := db.ConnectDB()
 				defer DB.Close()
-				db.ExportData(DB)
+				db.ExportData(DB, config.ExportPath)
 			}()
 			return m, nil
 

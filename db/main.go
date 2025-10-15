@@ -129,7 +129,7 @@ func createTables(db *sql.DB, path string) {
 	}
 }
 
-func ExportData(db *sql.DB) {
+func ExportData(db *sql.DB, exportPath string) {
 	var data JData
 
 	data.Anime = ListRatings(db, "anime")
@@ -142,7 +142,11 @@ func ExportData(db *sql.DB) {
 		log.Fatal(err)
 	}
 
-	file, err := os.Create("export.json")
+	if err = os.MkdirAll(filepath.Dir(exportPath), 0755); err != nil {
+		log.Fatal(err)
+	}
+
+	file, err := os.Create(exportPath)
 	if err != nil {
 		log.Fatal(err)
 	}

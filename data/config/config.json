@@ -1,0 +1,9 @@
+{
+  "parameters": [
+    { "Art/Animation": 25 },
+    { "Character/Cast": 30 },
+    { "Plot": 35 },
+    { "Bias": 10 }
+  ],
+  "export_path": "export.json"
+}
