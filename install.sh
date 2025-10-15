@@ -75,5 +75,10 @@ cp -r $BASEPATHREPO/README.md  $BASEPATHINSTALL/lib/docs/README.md
 sleep 0.1
 echo Successfully copied docs.
 
+# copy config files
+cp -r $BASEPATHREPO/data/config $HOME/.config/arsg
+sleep 0.1
+echo Successfully copied config files.
+
 sleep 0.5
 echo Installation successful.

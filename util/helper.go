@@ -12,6 +12,7 @@ type ParamType map[string]int
 
 type ConfigType struct {
 	Parameters []ParamType `json:"parameters"`
+	ExportPath string      `json:"export_path"`
 }
 
 var defaultConfigParams = []ParamType{
@@ -60,7 +61,6 @@ func CapitalizeFirstLetter(args ...string) (string, error) {
 }
 
 func LoadConfig(config *ConfigType) {
-	var params = make([]string, 0)
 	configPath := filepath.Join(os.Getenv("HOME"), ".config", "arsg", "config.json")
 
 	file, err := os.ReadFile(configPath)
@@ -69,9 +69,16 @@ func LoadConfig(config *ConfigType) {
 		os.Exit(1)
 	}
 
-	if err = json.Unmarshal(file, &config); err != nil {
+	if err := json.Unmarshal(file, &config); err != nil {
 		fmt.Println("could not unmarshal config file:", err)
 	}
+
+	handleParameters(config)
+	handleExportPath(config)
+}
+
+func handleParameters(config *ConfigType) {
+	var params = make([]string, 0)
 
 	if len(config.Parameters) == 0 {
 		config.Parameters = defaultConfigParams
@@ -82,5 +89,13 @@ func LoadConfig(config *ConfigType) {
 		for k := range p {
 			params = append(params, k)
 		}
+	}
+}
+
+func handleExportPath(config *ConfigType) {
+	if config.ExportPath == "" {
+		config.ExportPath = filepath.Join(os.Getenv("HOME"), "temp", "export.json")
+	} else {
+		config.ExportPath = filepath.Join(os.Getenv("HOME"), config.ExportPath)
 	}
 }
