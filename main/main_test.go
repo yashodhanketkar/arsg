@@ -4,6 +4,12 @@ import (
 	"os"
 	"reflect"
 	"testing"
+
+	"github.com/yashodhanketkar/arsg/util"
+)
+
+const (
+	wantFGotF = util.WantFGotF
 )
 
 func TestMainLoop(t *testing.T) {
@@ -26,7 +32,7 @@ func TestMainLoop(t *testing.T) {
 		got := mainLoop()
 
 		if !reflect.DeepEqual(got, want) {
-			t.Errorf("want %f, got %f", want, got)
+			t.Errorf(wantFGotF, want, got)
 		}
 	})
 
@@ -48,7 +54,7 @@ func TestMainLoop(t *testing.T) {
 		got := mainLoop()
 
 		if !reflect.DeepEqual(got, want) {
-			t.Errorf("want %f, got %f", want, got)
+			t.Errorf(wantFGotF, want, got)
 		}
 	})
 
@@ -70,7 +76,7 @@ func TestMainLoop(t *testing.T) {
 		got := mainLoop()
 
 		if !reflect.DeepEqual(got, want) {
-			t.Errorf("want %f, got %f", want, got)
+			t.Errorf(wantFGotF, want, got)
 		}
 	})
 
@@ -97,7 +103,7 @@ func TestMainLoop(t *testing.T) {
 		got := mainLoop()
 
 		if !reflect.DeepEqual(got, want) {
-			t.Errorf("want %f, got %f", want, got)
+			t.Errorf(wantFGotF, want, got)
 		}
 	})
 }

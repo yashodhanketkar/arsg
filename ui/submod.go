@@ -12,13 +12,15 @@ import (
 	"github.com/yashodhanketkar/arsg/util"
 )
 
+const ctrlC = util.CtrlC
+
 // INFO: Confirm submod
 
 func (m *model) confirmUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
-		case "ctrl+c":
+		case ctrlC:
 			return m, tea.Batch(tea.ExitAltScreen, tea.Quit)
 
 		case "f1":
@@ -63,7 +65,7 @@ func (m *model) docUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case tea.KeyMsg:
 		switch msg.String() {
-		case "ctrl+c", "q":
+		case ctrlC, "q":
 			return m, tea.Batch(tea.ExitAltScreen, tea.Quit)
 
 		case "j":
@@ -125,7 +127,7 @@ func (m *model) formUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyMsg:
 		switch msg.String() {
 
-		case "ctrl+c":
+		case ctrlC:
 			return m, tea.Batch(tea.ExitAltScreen, tea.Quit)
 
 		case "ctrl+e":
@@ -321,7 +323,7 @@ func (m *model) scoreUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case tea.KeyMsg:
 		switch msg.String() {
-		case "ctrl+c", "q":
+		case ctrlC, "q":
 			return m, tea.Batch(tea.ExitAltScreen, tea.Quit)
 
 		case "f1":

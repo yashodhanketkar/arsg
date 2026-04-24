@@ -20,7 +20,7 @@ func TestGetParams(t *testing.T) {
 	}{
 		{
 			name:        "Get params default",
-			wantParams:  []string{"Art/Animation", "Character/Cast", "Plot", "Bias"},
+			wantParams:  DefaultParams,
 			wantWeights: []int{25, 30, 35, 10},
 			config:      ConfigType{},
 		},
@@ -93,7 +93,7 @@ func TestReadParams(t *testing.T) {
 			{"Bias": 10},
 		}
 
-		expectedParamList := []string{"Art/Animation", "Character/Cast", "Plot", "Bias"}
+		expectedParamList := DefaultParams
 		actualParamList, _ := GetParams(&config)
 
 		assert.Equal(t, expectedParam, config.Parameters)
@@ -103,7 +103,7 @@ func TestReadParams(t *testing.T) {
 	t.Run("test readParams - default parameters", func(t *testing.T) {
 		var config ConfigType = ConfigType{}
 
-		expectedParamList := []string{"Art/Animation", "Character/Cast", "Plot", "Bias"}
+		expectedParamList := DefaultParams
 		actualParamList, _ := GetParams(&config)
 
 		assert.Equal(t, defaultConfigParams, config.Parameters)
@@ -129,7 +129,7 @@ func TestCalculator(t *testing.T) {
 			got := rounder(tt.target)
 
 			if got != tt.want {
-				t.Errorf("want %f, got %f", tt.want, got)
+				t.Errorf(WantFGotF, tt.want, got)
 			}
 		}
 	})
@@ -148,7 +148,7 @@ func TestCalculator(t *testing.T) {
 			got := rounder(tt.target)
 
 			if got != tt.want {
-				t.Errorf("want %f, got %f", tt.want, got)
+				t.Errorf(WantFGotF, tt.want, got)
 			}
 		}
 	})
@@ -177,7 +177,7 @@ func TestCalculator(t *testing.T) {
 			got, _ := Calculator(&config, tt.parameters...)
 
 			if got != tt.want {
-				t.Errorf("want %f, got %f", tt.want, got)
+				t.Errorf(WantFGotF, tt.want, got)
 			}
 		}
 	})
@@ -204,7 +204,7 @@ func TestConverters(t *testing.T) {
 			want := tt.output
 
 			if got != want {
-				t.Errorf("got %f, want %f", got, want)
+				t.Errorf(WantFGotF, got, want)
 			}
 		}
 	})
@@ -226,7 +226,7 @@ func TestConverters(t *testing.T) {
 			want := tt.output
 
 			if got != want {
-				t.Errorf("got %f, want %f", got, want)
+				t.Errorf(WantFGotF, got, want)
 			}
 		}
 	})
@@ -248,7 +248,7 @@ func TestConverters(t *testing.T) {
 			want := tt.output
 
 			if got != want {
-				t.Errorf("got %f, want %f", got, want)
+				t.Errorf(WantFGotF, got, want)
 			}
 		}
 	})
@@ -273,7 +273,7 @@ func TestFloatParser(t *testing.T) {
 		want := float32(tt.expected)
 		got := FloatParser(tt.value)
 		if got != want {
-			t.Errorf("want %v; got %v", want, got)
+			t.Errorf(WantVGotV, want, got)
 		}
 	}
 }
@@ -292,7 +292,7 @@ func TestInput(t *testing.T) {
 
 		got := Input("Plot")
 		if got != want {
-			t.Errorf("want %v; got %v", want, got)
+			t.Errorf(WantVGotV, want, got)
 		}
 	})
 
@@ -308,7 +308,7 @@ func TestInput(t *testing.T) {
 
 		got := Input("Plot")
 		if got != want {
-			t.Errorf("want %v; got %v", want, got)
+			t.Errorf(WantVGotV, want, got)
 		}
 	})
 
@@ -324,7 +324,7 @@ func TestInput(t *testing.T) {
 
 		got := Input("Plot")
 		if got != want {
-			t.Errorf("want %v; got %v", want, got)
+			t.Errorf(WantVGotV, want, got)
 		}
 	})
 }
@@ -335,7 +335,7 @@ func TestGetParameters(t *testing.T) {
 		want := []float32{0, 0, 0, 0}
 
 		if !reflect.DeepEqual(got, want) {
-			t.Errorf("want %v, got %v", want, got)
+			t.Errorf(WantVGotV, want, got)
 		}
 	})
 
@@ -357,7 +357,7 @@ func TestGetParameters(t *testing.T) {
 		got := GetParameters()
 
 		if !reflect.DeepEqual(got, want) {
-			t.Errorf("want %v; got %v", want, got)
+			t.Errorf(WantVGotV, want, got)
 		}
 	})
 }

@@ -6,6 +6,8 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/yashodhanketkar/arsg/util"
 )
 
 type ratingCtx struct {
@@ -37,6 +39,12 @@ CREATE TABLE IF NOT EXISTS manga (
   FOREIGN KEY (rating_id) REFERENCES rating (id)
 );
 `
+
+const (
+	wantOneGotMany = util.WantOneGotMany
+	wantQGotQ      = util.WantQGotQ
+	wantFGotF      = util.WantFGotF
+)
 
 func mockDB(t *testing.T) *sql.DB {
 	t.Helper()
@@ -95,36 +103,36 @@ func testAddRating(t *testing.T, db *sql.DB, rating Rating, contentType string) 
 	result := ListRatings(db, contentType)
 
 	if n := len(result); n != 1 {
-		t.Fatalf("want 1, got %d", n)
+		t.Fatalf(wantOneGotMany, n)
 	}
 
 	got := result[0]
 	if got.Name != rating.Name {
-		t.Errorf("want %q, got %q", rating.Name, got.Name)
+		t.Errorf(wantQGotQ, rating.Name, got.Name)
 	}
 
 	if got.Art != rating.Art {
-		t.Errorf("want %f, got %f", rating.Art, got.Art)
+		t.Errorf(wantFGotF, rating.Art, got.Art)
 	}
 
 	if got.Support != rating.Support {
-		t.Errorf("want %f, got %f", rating.Support, got.Support)
+		t.Errorf(wantFGotF, rating.Support, got.Support)
 	}
 
 	if got.Plot != rating.Plot {
-		t.Errorf("want %f, got %f", rating.Plot, got.Plot)
+		t.Errorf(wantFGotF, rating.Plot, got.Plot)
 	}
 
 	if got.Bias != rating.Bias {
-		t.Errorf("want %f, got %f", rating.Bias, got.Bias)
+		t.Errorf(wantFGotF, rating.Bias, got.Bias)
 	}
 
 	if got.Rating != rating.Rating {
-		t.Errorf("want %q, got %q", rating.Rating, got.Rating)
+		t.Errorf(wantQGotQ, rating.Rating, got.Rating)
 	}
 
 	if got.Comments != rating.Comments {
-		t.Errorf("want %q, got %q", rating.Comments, got.Comments)
+		t.Errorf(wantQGotQ, rating.Comments, got.Comments)
 	}
 }
 
@@ -141,11 +149,11 @@ func testAnimeRating(t *testing.T, db *sql.DB, ctx ratingCtx) {
 	rows.Scan(&id, &ratingID)
 
 	if id != ctx.id {
-		t.Errorf("want 1, got %d", id)
+		t.Errorf(wantOneGotMany, id)
 	}
 
 	if ratingID != ctx.ratingId {
-		t.Errorf("want 1, got %d", ratingID)
+		t.Errorf(wantOneGotMany, ratingID)
 	}
 }
 
@@ -162,10 +170,10 @@ func testMangaRating(t *testing.T, db *sql.DB, ctx ratingCtx) {
 	rows.Scan(&id, &ratingID)
 
 	if id != ctx.id {
-		t.Errorf("want 1, got %d", id)
+		t.Errorf(wantOneGotMany, id)
 	}
 
 	if ratingID != ctx.ratingId {
-		t.Errorf("want 1, got %d", ratingID)
+		t.Errorf(wantOneGotMany, ratingID)
 	}
 }
