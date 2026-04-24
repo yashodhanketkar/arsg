@@ -28,6 +28,8 @@ func (i item) Title() string       { return i.title }
 func (i item) Description() string { return fmt.Sprintf("%s - %+v", i.score, i.parameters) }
 func (i item) FilterValue() string { return i.title }
 
+const buttonText = "[ %s ]"
+
 var (
 	// INFO: Text and input styles
 	defaultStyle        = lipgloss.NewStyle().Margin(1, 2)
@@ -58,9 +60,9 @@ var (
 	focusedButtonRes = focusedStyle.Render("[ Restart ]")
 
 	// blurredButtonCf  = fmt.Sprintf("[ %s ]", blurredStyle.Render("Confirm"))
-	blurredButtonSv  = fmt.Sprintf("[ %s ]", blurredStyle.Render("Save"))
-	blurredButtonEnd = fmt.Sprintf("[ %s ]", blurredStyle.Render("End"))
-	blurredButtonRes = fmt.Sprintf("[ %s ]", blurredStyle.Render("Restart"))
+	blurredButtonSv  = fmt.Sprintf(buttonText, blurredStyle.Render("Save"))
+	blurredButtonEnd = fmt.Sprintf(buttonText, blurredStyle.Render("End"))
+	blurredButtonRes = fmt.Sprintf(buttonText, blurredStyle.Render("Restart"))
 
 	// INFO: Markdown styles
 	titleStyle = func() lipgloss.Style {
@@ -172,11 +174,15 @@ func (m *model) calculateScore() {
 	}
 
 	if allValid {
-		if score, err := util.Calculator(&config, parameters...); err == nil {
-			m.score = util.SystemCalculator(scoreSystem[m.scoreMode], score)
-		} else {
-			m.score = 0
-		}
+		m.validator(&config, parameters...)
+	} else {
+		m.score = 0
+	}
+}
+
+func (m *model) validator(config *util.ConfigType, parameters ...float32) {
+	if score, err := util.Calculator(config, parameters...); err == nil {
+		m.score = util.SystemCalculator(scoreSystem[m.scoreMode], score)
 	} else {
 		m.score = 0
 	}

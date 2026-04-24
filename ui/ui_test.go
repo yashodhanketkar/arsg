@@ -75,13 +75,13 @@ func TestHelpers(t *testing.T) {
 
 		// check correct score
 		m.calculateScore()
-		assert.Equal(t, float32(6.8), m.score)
+		assert.Equal(t, float32(7.2), m.score)
 
 		// check max allowed score
 		for _, v := range []string{"10", "15"} {
 			m.inputs[4].SetValue(v)
 			m.calculateScore()
-			assert.Equal(t, float32(7.2), m.score)
+			assert.Equal(t, float32(7.7), m.score)
 		}
 
 		// check all 0 score
@@ -99,7 +99,7 @@ func TestHelpers(t *testing.T) {
 		m.calculateScore()
 		m.copyToClipboard()
 		v, _ := clipboard.ReadAll()
-		assert.Equal(t, "6.8", v)
+		assert.Equal(t, "7.2", v)
 		clipboard.WriteAll("Test Name")
 		m.pasteFromClipbaord()
 		assert.Equal(t, "Test Name", m.inputs[0].Value())
@@ -122,7 +122,7 @@ func TestHelpers(t *testing.T) {
 			Support:  7.5,
 			Plot:     6.5,
 			Bias:     5.5,
-			Rating:   "6.8",
+			Rating:   "7.2",
 			Comments: "comment",
 		}
 
@@ -170,7 +170,7 @@ func TestButtonCommands(t *testing.T) {
 
 		v, err := clipboard.ReadAll()
 		assert.Nil(t, err)
-		assert.Equal(t, "6.8", v)
+		assert.Equal(t, "7.2", v)
 	})
 
 	t.Run("test reset button", func(t *testing.T) {

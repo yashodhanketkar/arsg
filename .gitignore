@@ -49,3 +49,7 @@ Thumbs.db
 export.json
 backup/
 dev/
+
+# SonarQube
+.scannerwork/
+sonar-project.properties

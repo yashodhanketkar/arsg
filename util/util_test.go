@@ -20,7 +20,7 @@ func TestGetParams(t *testing.T) {
 	}{
 		{
 			name:        "Get params default",
-			wantParams:  []string{"Art/Animation", "Character/Cast", "Plot", "Bias"},
+			wantParams:  DefaultParams,
 			wantWeights: []int{25, 30, 35, 10},
 			config:      ConfigType{},
 		},
@@ -87,12 +87,13 @@ func TestReadParams(t *testing.T) {
 		LoadConfig(&config)
 
 		expectedParam := []ParamType{
-			{"art": 25},
-			{"plot": 35},
-			{"character": 30},
-			{"bias": 10},
+			{"Art/Animation": 25},
+			{"Character/Cast": 30},
+			{"Plot": 35},
+			{"Bias": 10},
 		}
-		expectedParamList := []string{"art", "plot", "character", "bias"}
+
+		expectedParamList := DefaultParams
 		actualParamList, _ := GetParams(&config)
 
 		assert.Equal(t, expectedParam, config.Parameters)
@@ -102,7 +103,7 @@ func TestReadParams(t *testing.T) {
 	t.Run("test readParams - default parameters", func(t *testing.T) {
 		var config ConfigType = ConfigType{}
 
-		expectedParamList := []string{"Art/Animation", "Character/Cast", "Plot", "Bias"}
+		expectedParamList := DefaultParams
 		actualParamList, _ := GetParams(&config)
 
 		assert.Equal(t, defaultConfigParams, config.Parameters)
@@ -119,16 +120,16 @@ func TestCalculator(t *testing.T) {
 			target float32
 			want   float32
 		}{
-			{10.0, 9.4},
-			{6.7, 6.3},
+			{10.0, 10.0},
+			{6.7, 6.7},
 			{0, 0.0},
 		}
 
 		for _, tt := range adjusterTests {
-			got := adjuster(tt.target)
+			got := rounder(tt.target)
 
 			if got != tt.want {
-				t.Errorf("want %f, got %f", tt.want, got)
+				t.Errorf(WantFGotF, tt.want, got)
 			}
 		}
 	})
@@ -147,7 +148,7 @@ func TestCalculator(t *testing.T) {
 			got := rounder(tt.target)
 
 			if got != tt.want {
-				t.Errorf("want %f, got %f", tt.want, got)
+				t.Errorf(WantFGotF, tt.want, got)
 			}
 		}
 	})
@@ -166,14 +167,17 @@ func TestCalculator(t *testing.T) {
 			parameters []float32
 			want       float32
 		}{
-			{[]float32{5, 6, 3, 1}, 4.1}, {[]float32{10, 10, 10, 10}, 9.4},
+			{[]float32{1, 2, 3, 4}, 2.3},
+			{[]float32{5, 4, 3, 1}, 3.7},
+			{[]float32{5, 5.5, 5, 5}, 5.2},
+			{[]float32{10, 10, 10, 10}, 10.0},
 		}
 
 		for _, tt := range calculatorTests {
 			got, _ := Calculator(&config, tt.parameters...)
 
 			if got != tt.want {
-				t.Errorf("want %f, got %f", tt.want, got)
+				t.Errorf(WantFGotF, tt.want, got)
 			}
 		}
 	})
@@ -200,7 +204,7 @@ func TestConverters(t *testing.T) {
 			want := tt.output
 
 			if got != want {
-				t.Errorf("got %f, want %f", got, want)
+				t.Errorf(WantFGotF, got, want)
 			}
 		}
 	})
@@ -222,7 +226,7 @@ func TestConverters(t *testing.T) {
 			want := tt.output
 
 			if got != want {
-				t.Errorf("got %f, want %f", got, want)
+				t.Errorf(WantFGotF, got, want)
 			}
 		}
 	})
@@ -244,7 +248,7 @@ func TestConverters(t *testing.T) {
 			want := tt.output
 
 			if got != want {
-				t.Errorf("got %f, want %f", got, want)
+				t.Errorf(WantFGotF, got, want)
 			}
 		}
 	})
@@ -269,7 +273,7 @@ func TestFloatParser(t *testing.T) {
 		want := float32(tt.expected)
 		got := FloatParser(tt.value)
 		if got != want {
-			t.Errorf("want %v; got %v", want, got)
+			t.Errorf(WantVGotV, want, got)
 		}
 	}
 }
@@ -288,7 +292,7 @@ func TestInput(t *testing.T) {
 
 		got := Input("Plot")
 		if got != want {
-			t.Errorf("want %v; got %v", want, got)
+			t.Errorf(WantVGotV, want, got)
 		}
 	})
 
@@ -304,7 +308,7 @@ func TestInput(t *testing.T) {
 
 		got := Input("Plot")
 		if got != want {
-			t.Errorf("want %v; got %v", want, got)
+			t.Errorf(WantVGotV, want, got)
 		}
 	})
 
@@ -320,7 +324,7 @@ func TestInput(t *testing.T) {
 
 		got := Input("Plot")
 		if got != want {
-			t.Errorf("want %v; got %v", want, got)
+			t.Errorf(WantVGotV, want, got)
 		}
 	})
 }
@@ -331,7 +335,7 @@ func TestGetParameters(t *testing.T) {
 		want := []float32{0, 0, 0, 0}
 
 		if !reflect.DeepEqual(got, want) {
-			t.Errorf("want %v, got %v", want, got)
+			t.Errorf(WantVGotV, want, got)
 		}
 	})
 
@@ -353,7 +357,7 @@ func TestGetParameters(t *testing.T) {
 		got := GetParameters()
 
 		if !reflect.DeepEqual(got, want) {
-			t.Errorf("want %v; got %v", want, got)
+			t.Errorf(WantVGotV, want, got)
 		}
 	})
 }
