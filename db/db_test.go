@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS manga (
 );
 `
 
-func setupTestDB(t *testing.T) *sql.DB {
+func mockDB(t *testing.T) *sql.DB {
 	t.Helper()
 
 	db, err := sql.Open("sqlite3", ":memory:")
@@ -59,7 +59,7 @@ func setupTestDB(t *testing.T) *sql.DB {
 }
 
 func TestAddListRatings(t *testing.T) {
-	db := setupTestDB(t)
+	db := mockDB(t)
 	defer db.Close()
 
 	animeRating := Rating{

@@ -9,7 +9,7 @@ import (
 func TestMainLoop(t *testing.T) {
 
 	t.Run("should return correct result", func(t *testing.T) {
-		want := []float32{3.2}
+		want := []float32{3.3}
 		originalStdin := os.Stdin
 
 		defer func() { os.Stdin = originalStdin }()
@@ -30,8 +30,8 @@ func TestMainLoop(t *testing.T) {
 		}
 	})
 
-	t.Run("should return 9.4", func(t *testing.T) {
-		want := []float32{9.4}
+	t.Run("should return 10.0", func(t *testing.T) {
+		want := []float32{10.0}
 		originalStdin := os.Stdin
 
 		defer func() { os.Stdin = originalStdin }()

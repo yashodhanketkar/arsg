@@ -87,12 +87,13 @@ func TestReadParams(t *testing.T) {
 		LoadConfig(&config)
 
 		expectedParam := []ParamType{
-			{"art": 25},
-			{"plot": 35},
-			{"character": 30},
-			{"bias": 10},
+			{"Art/Animation": 25},
+			{"Character/Cast": 30},
+			{"Plot": 35},
+			{"Bias": 10},
 		}
-		expectedParamList := []string{"art", "plot", "character", "bias"}
+
+		expectedParamList := []string{"Art/Animation", "Character/Cast", "Plot", "Bias"}
 		actualParamList, _ := GetParams(&config)
 
 		assert.Equal(t, expectedParam, config.Parameters)
@@ -119,13 +120,13 @@ func TestCalculator(t *testing.T) {
 			target float32
 			want   float32
 		}{
-			{10.0, 9.4},
-			{6.7, 6.3},
+			{10.0, 10.0},
+			{6.7, 6.7},
 			{0, 0.0},
 		}
 
 		for _, tt := range adjusterTests {
-			got := adjuster(tt.target)
+			got := rounder(tt.target)
 
 			if got != tt.want {
 				t.Errorf("want %f, got %f", tt.want, got)
@@ -166,7 +167,10 @@ func TestCalculator(t *testing.T) {
 			parameters []float32
 			want       float32
 		}{
-			{[]float32{5, 6, 3, 1}, 4.1}, {[]float32{10, 10, 10, 10}, 9.4},
+			{[]float32{1, 2, 3, 4}, 2.3},
+			{[]float32{5, 4, 3, 1}, 3.7},
+			{[]float32{5, 5.5, 5, 5}, 5.2},
+			{[]float32{10, 10, 10, 10}, 10.0},
 		}
 
 		for _, tt := range calculatorTests {
