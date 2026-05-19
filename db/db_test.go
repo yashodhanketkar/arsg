@@ -2,9 +2,6 @@ package db
 
 import (
 	"database/sql"
-	"fmt"
-	"os"
-	"path/filepath"
 	"testing"
 
 	"github.com/yashodhanketkar/arsg/util"
@@ -15,59 +12,14 @@ type ratingCtx struct {
 	ratingId int64
 }
 
-const schema = `
-CREATE TABLE IF NOT EXISTS %s (
-	id INTEGER PRIMARY KEY AUTOINCREMENT,
-	name TEXT,
-	art REAL,
-	support REAL,
-	plot REAL,
-	bias REAL,
-	rating TEXT,
-	comments TEXT
-);
-
-CREATE TABLE IF NOT EXISTS anime (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  rating_id integer NOT NULL,
-  FOREIGN KEY (rating_id) REFERENCES rating (id)
-);
-
-CREATE TABLE IF NOT EXISTS manga (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  rating_id integer NOT NULL,
-  FOREIGN KEY (rating_id) REFERENCES rating (id)
-);
-`
-
 const (
 	wantOneGotMany = util.WantOneGotMany
 	wantQGotQ      = util.WantQGotQ
 	wantFGotF      = util.WantFGotF
 )
 
-func mockDB(t *testing.T) *sql.DB {
-	t.Helper()
-
-	db, err := sql.Open("sqlite3", ":memory:")
-	if err != nil {
-		t.Fatalf("failed to open database: %v", err)
-	}
-
-	schemaPath := filepath.Join(t.TempDir(), "schema.sql")
-	schemaSQL := fmt.Sprintf(schema, "rating")
-	err = os.WriteFile(schemaPath, []byte(schemaSQL), 0644)
-
-	if err != nil {
-		t.Fatalf("failed to write schema file: %v", err)
-	}
-	createTables(db, schemaPath)
-
-	return db
-}
-
 func TestAddListRatings(t *testing.T) {
-	db := mockDB(t)
+	db := util.MockDB(t)
 	defer db.Close()
 
 	animeRating := Rating{

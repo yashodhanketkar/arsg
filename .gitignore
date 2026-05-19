@@ -53,3 +53,7 @@ dev/
 # SonarQube
 .scannerwork/
 sonar-project.properties
+
+local/
+
+tmp/

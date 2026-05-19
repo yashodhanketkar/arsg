@@ -13,16 +13,18 @@ start:
 startclean: build
 	@./build/arsg
 
-build: test
-	@go build -o ./build/arsg ./main/main.go
+build: test clean
+	@mkdir -p build
+	@go build -buildmode=exe -o ./build/arsg -trimpath ./main/main.go
+	@upx --best --lzma ./build/arsg
 
 install: build
-	@chmod a+x ./install.sh
-	@./install.sh
+	@chmod a+x ./scripts/install.sh
+	@./scripts/install.sh
 
 uninstall:
-	@chmod a+x ./install.sh
-	@./uninstall.sh
+	@chmod a+x ./scripts/install.sh
+	@./scripts/uninstall.sh
 
 commit: add
 	@git commit

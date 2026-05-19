@@ -8,11 +8,12 @@ import (
 	"os"
 	"path/filepath"
 
-	_ "github.com/mattn/go-sqlite3"
+	"github.com/yashodhanketkar/arsg/util"
+	_ "modernc.org/sqlite"
 )
 
-func ConnectDB() *sql.DB {
-	db, err := sql.Open("sqlite3", dbPath)
+var ConnectDB = func() *sql.DB {
+	db, err := sql.Open("sqlite", dbPath)
 
 	if err != nil {
 		log.Fatal(err)
@@ -28,12 +29,12 @@ func InitDB() {
 		log.Fatal(tempErr)
 	}
 
-	if DB, err = sql.Open("sqlite3", dbPath); err != nil {
+	if DB, err = sql.Open("sqlite", dbPath); err != nil {
 		log.Fatal(err)
 	}
 
 	defer DB.Close()
-	createTables(DB, filepath.Join(basePath, "schema/arsg.sql"))
+	util.CreateTables(DB, filepath.Join(basePath, "schema/arsg.sql"))
 }
 
 func addRating(tx *sql.Tx, ratings Rating) (int64, error) {
@@ -115,18 +116,6 @@ func ListRatings(db *sql.DB, contentType string) []Rating {
 		ratings = append(ratings, rating)
 	}
 	return ratings
-}
-
-func createTables(db *sql.DB, path string) {
-	schemeTasks, err := os.ReadFile(path)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	_, err = db.Exec(string(schemeTasks))
-	if err != nil {
-		log.Fatal(err)
-	}
 }
 
 func ExportData(db *sql.DB, exportPath string) {
