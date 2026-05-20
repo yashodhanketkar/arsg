@@ -50,27 +50,28 @@ func calculateResult(body io.ReadCloser) ([]byte, error) {
 	return []byte(output), nil
 }
 
-func addRating(content_type string, body io.ReadCloser, DB *sql.DB) error {
+func addRating(content_type string, body io.ReadCloser, DB *sql.DB) (db.Rating, error) {
+	var rating db.Rating
 	if !validContentTypes[content_type] {
-		return errors.New("Invalid content type: " + content_type)
+		return rating, errors.New("Invalid content type: " + content_type)
 	}
 
 	jsonBody, err := calculateResult(body)
 	if err != nil {
-		return err
+		return rating, err
 	}
 
 	if len(jsonBody) == 0 {
-		return errors.New("Failed to generate output")
+		return rating, errors.New("Failed to generate output")
 	}
 
 	var rawRatings map[string]interface{}
 	if err := json.Unmarshal(jsonBody, &rawRatings); err != nil {
-		return errors.New("Invalid input format: " + err.Error())
+		return rating, errors.New("Invalid input format: " + err.Error())
 	}
 
 	dbRating := convertRating(rawRatings)
 	db.AddRatings(DB, dbRating, content_type)
 
-	return nil
+	return dbRating, nil
 }

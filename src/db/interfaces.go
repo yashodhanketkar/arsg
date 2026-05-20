@@ -14,7 +14,11 @@ var (
 )
 
 func init() {
-	switch env {
+	setPaths(env)
+}
+
+func setPaths(environment string) {
+	switch environment {
 	case "dev":
 		basePath = filepath.Join(os.Getenv("PWD"), "dev-workspace/lib/")
 
@@ -24,8 +28,6 @@ func init() {
 	default:
 		panic("Invalid GO_ENV. Must be either 'dev' or 'prod'")
 	}
-
-	dbPath = filepath.Join(basePath, "arsg.db")
 }
 
 type Rating struct {

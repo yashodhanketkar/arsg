@@ -2,6 +2,7 @@ package api
 
 import (
 	"database/sql"
+	"encoding/json"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -26,7 +27,7 @@ func ratingRouter(r *chi.Mux, db *sql.DB) {
 
 // returns list of ratings for a given content type.
 func (s *Server) listHandler(w http.ResponseWriter, r *http.Request) {
-	res, err := contentList(r.PathValue("content_type"), s.db)
+	res, err := contentList(chi.URLParam(r, "content_type"), s.db)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -58,12 +59,13 @@ func (s *Server) calcHandler(w http.ResponseWriter, r *http.Request) {
 // calculate and stores rating for a given content type in the database.
 func (s *Server) addHandler(w http.ResponseWriter, r *http.Request) {
 	body := r.Body
-	err := addRating(r.PathValue("content_type"), body, s.db)
+	data, err := addRating(chi.URLParam(r, "content_type"), body, s.db)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	w.Write([]byte("Success"))
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(data)
 }

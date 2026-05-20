@@ -25,8 +25,8 @@ var ConnectDB = func() *sql.DB {
 func InitDB() *sql.DB {
 	var err error
 
-	if tempErr := os.Mkdir(filepath.Dir(basePath), 0755); !os.IsExist(tempErr) {
-		log.Fatal(tempErr)
+	if err := os.Mkdir(filepath.Dir(basePath), 0755); !os.IsExist(err) {
+		log.Fatal(err)
 	}
 
 	if DB, err = sql.Open("sqlite", dbPath); err != nil {

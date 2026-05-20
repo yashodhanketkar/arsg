@@ -1,11 +1,7 @@
 package util
 
 const (
-	WantOneGotMany = "want 1, got %d"
-	WantQGotQ      = "want %q, got %q"
-	WantFGotF      = "want %f, got %f"
-	WantVGotV      = "want %v, got %v"
-	CtrlC          = "ctrl+c"
+	CtrlC = "ctrl+c"
 
 	MockDBShema = `
 CREATE TABLE IF NOT EXISTS rating (

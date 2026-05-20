@@ -18,23 +18,8 @@ type calcStruct struct {
 	Rating  string `json:"rating"`
 }
 
-var (
-	// INFO: Will replace util.DefaultParams in future updates
-	apiParams         = []string{"Art", "Cast", "Plot", "Bias"}
-	validContentTypes = map[string]bool{"anime": true, "manga": true, "lightnovel": true}
-)
-
 // convert data to a list for code reduction
 func (bc calcStruct) metrics() []string { return []string{bc.Art, bc.Cast, bc.Plot, bc.Bias} }
-
-// check if content type is valid
-func validateContentType(content_type string) (string, error) {
-	if !validContentTypes[content_type] {
-		return "", errors.New("Invalid content type: " + content_type)
-	}
-
-	return content_type, nil
-}
 
 // handle input validation as per rquirements
 func (bc calcStruct) parseAndValidate() ([4]float32, error) {

@@ -1,23 +1,31 @@
 package api
 
 import (
-	"io"
+	"database/sql"
 	"log"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
-	"github.com/yashodhanketkar/arsg/src/db"
 )
 
-func Serve() {
+type CalcResponse struct {
+	Title    string  `json:"title"`
+	Comments string  `json:"comments"`
+	Art      float32 `json:"art"`
+	Cast     float32 `json:"cast"`
+	Plot     float32 `json:"plot"`
+	Bias     float32 `json:"bias"`
+	Rating   float32 `json:"rating"`
+}
+
+func Serve(DB *sql.DB) {
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 	r.Use(autoCleanBody)
 
 	// inject database connection
-	DB := db.ConnectDB()
 	defer DB.Close()
 
 	// main router
@@ -27,17 +35,4 @@ func Serve() {
 	if err := http.ListenAndServe(":5000", r); err != nil {
 		log.Fatal(err)
 	}
-}
-
-func autoCleanBody(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Body != nil {
-			defer func() {
-				io.Copy(io.Discard, r.Body)
-				r.Body.Close()
-			}()
-
-			next.ServeHTTP(w, r)
-		}
-	})
 }

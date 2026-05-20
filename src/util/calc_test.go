@@ -1,6 +1,10 @@
 package util
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+)
 
 func mockConfig(t *testing.T) ConfigType {
 	t.Helper()
@@ -20,11 +24,10 @@ func TestCalculator(t *testing.T) {
 	config := mockConfig(t)
 
 	t.Run("should throw error", func(t *testing.T) {
-		_, err := Calculator(&config, []float32{0, 0, 0, 0}...)
+		got, err := Calculator(&config, []float32{0, 0, 0, 0}...)
 
-		if err == nil {
-			t.Error("should throw error")
-		}
+		assert.Error(t, err)
+		assert.Equal(t, float32(0.0), got)
 	})
 
 	t.Run("should return correct scores", func(t *testing.T) {
@@ -38,11 +41,10 @@ func TestCalculator(t *testing.T) {
 		}
 
 		for _, tt := range calculatorTests {
-			got, _ := Calculator(&config, tt.parameters...)
+			got, err := Calculator(&config, tt.parameters...)
 
-			if got != tt.want {
-				t.Errorf(WantFGotF, tt.want, got)
-			}
+			assert.NoError(t, err)
+			assert.Equal(t, tt.want, got)
 		}
 	})
 
@@ -56,15 +58,11 @@ func TestCalculator(t *testing.T) {
 		}
 
 		for _, tt := range calculatorTests {
-			_, err := Calculator(&config, tt.parameters...)
+			got, err := Calculator(&config, tt.parameters...)
 
-			if err == nil {
-				t.Errorf("should throw error")
-			}
-
-			if err.Error() != tt.err {
-				t.Errorf("expected error %s, got %s", tt.err, err)
-			}
+			assert.Error(t, err)
+			assert.Equal(t, err.Error(), tt.err)
+			assert.Equal(t, float32(0.0), got)
 		}
 	})
 
@@ -84,10 +82,7 @@ func TestRounder(t *testing.T) {
 
 		for _, tt := range adjusterTests {
 			got := rounder(tt.target)
-
-			if got != tt.want {
-				t.Errorf(WantFGotF, tt.want, got)
-			}
+			assert.Equal(t, tt.want, got)
 		}
 	})
 
@@ -104,10 +99,7 @@ func TestRounder(t *testing.T) {
 		for _, tt := range rounderTests {
 			t.Run(tt.name, func(t *testing.T) {
 				got := rounder(tt.target)
-
-				if got != tt.want {
-					t.Errorf(WantFGotF, tt.want, got)
-				}
+				assert.Equal(t, tt.want, got)
 			})
 		}
 	})

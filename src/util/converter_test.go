@@ -1,6 +1,10 @@
 package util
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+)
 
 func TestConverters(t *testing.T) {
 	t.Run("should return correct values", func(t *testing.T) {
@@ -20,11 +24,7 @@ func TestConverters(t *testing.T) {
 
 		for _, tt := range converterMinTest {
 			got := SystemCalculator(tt.systemType, tt.score)
-			want := tt.output
-
-			if got != want {
-				t.Errorf(WantFGotF, got, want)
-			}
+			assert.Equal(t, tt.output, got)
 		}
 	})
 
@@ -42,11 +42,7 @@ func TestConverters(t *testing.T) {
 
 		for _, tt := range converterMinTest {
 			got := SystemCalculator(tt.systemType, tt.score)
-			want := tt.output
-
-			if got != want {
-				t.Errorf(WantFGotF, got, want)
-			}
+			assert.Equal(t, tt.output, got)
 		}
 	})
 
@@ -64,11 +60,7 @@ func TestConverters(t *testing.T) {
 
 		for _, tt := range converterMinTest {
 			got := SystemCalculator(tt.systemType, tt.score)
-			want := tt.output
-
-			if got != want {
-				t.Errorf(WantFGotF, got, want)
-			}
+			assert.Equal(t, tt.output, got)
 		}
 	})
 }
@@ -89,16 +81,13 @@ func TestFloatParser(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		want := float32(tt.expected)
 		got := FloatParser(tt.value)
-		if got != want {
-			t.Errorf(WantVGotV, want, got)
-		}
+		assert.Equal(t, float32(tt.expected), got)
 	}
 }
 
 func TestGetNumericInput(t *testing.T) {
-	testCases := []struct {
+	tests := []struct {
 		input  string
 		output string
 	}{
@@ -108,12 +97,8 @@ func TestGetNumericInput(t *testing.T) {
 		{"a123", "123"},
 	}
 
-	for i, tt := range testCases {
+	for _, tt := range tests {
 		got := GetNumericInput(tt.input)
-		want := tt.output
-
-		if got != want {
-			t.Errorf("[%d] want %v; got %v", i+1, want, got)
-		}
+		assert.Equal(t, tt.output, got)
 	}
 }

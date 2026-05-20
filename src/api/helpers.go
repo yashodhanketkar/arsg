@@ -1,9 +1,18 @@
 package api
 
 import (
+	"errors"
 	"fmt"
+	"io"
+	"net/http"
 
 	"github.com/yashodhanketkar/arsg/src/util"
+)
+
+var (
+	// INFO: Will replace util.DefaultParams in future updates
+	apiParams         = []string{"Art", "Cast", "Plot", "Bias"}
+	validContentTypes = map[string]bool{"anime": true, "manga": true, "lightnovel": true}
 )
 
 // returns string value or empty string
@@ -42,4 +51,30 @@ func extractFloatValue(m map[string]interface{}, key string) float32 {
 	default:
 		return 0.0
 	}
+}
+
+// check if content type is valid
+func validateContentType(content_type string) (string, error) {
+	if content_type == "" {
+		return "", errors.New("No content type provided")
+	}
+
+	if !validContentTypes[content_type] {
+		return "", errors.New("Invalid content type: " + content_type)
+	}
+
+	return content_type, nil
+}
+
+func autoCleanBody(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Body != nil {
+			defer func() {
+				io.Copy(io.Discard, r.Body)
+				r.Body.Close()
+			}()
+
+			next.ServeHTTP(w, r)
+		}
+	})
 }
