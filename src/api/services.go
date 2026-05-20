@@ -6,7 +6,7 @@ import (
 	"errors"
 	"io"
 
-	"github.com/yashodhanketkar/arsg/db"
+	"github.com/yashodhanketkar/arsg/src/db"
 )
 
 func contentList(content_type string, DB *sql.DB) ([]byte, error) {

@@ -2,7 +2,6 @@ package util
 
 import (
 	"database/sql"
-	"fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -12,14 +11,13 @@ import (
 func MockDB(t *testing.T) *sql.DB {
 	t.Helper()
 
-	db, err := sql.Open("sqlite", ":memory:")
+	db, err := sql.Open("sqlite", ":memory:?cache=shared")
 	if err != nil {
 		t.Fatalf("failed to open database: %v", err)
 	}
 
 	schemaPath := filepath.Join(t.TempDir(), "schema.sql")
-	schemaSQL := fmt.Sprintf(MockDBShema, "rating")
-	err = os.WriteFile(schemaPath, []byte(schemaSQL), 0644)
+	err = os.WriteFile(schemaPath, []byte(MockDBShema), 0644)
 
 	if err != nil {
 		t.Fatalf("failed to write schema file: %v", err)
@@ -37,13 +35,13 @@ func MockDB(t *testing.T) *sql.DB {
 	return db
 }
 
-func CreateTables(db *sql.DB, path string) {
+func CreateTables(DB *sql.DB, path string) {
 	schemeTasks, err := os.ReadFile(path)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	_, err = db.Exec(string(schemeTasks))
+	_, err = DB.Exec(string(schemeTasks))
 	if err != nil {
 		log.Fatal(err)
 	}

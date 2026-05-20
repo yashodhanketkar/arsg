@@ -1,19 +1,31 @@
 package ui
 
 import (
+	"database/sql"
 	"testing"
 
 	"github.com/atotto/clipboard"
 	"github.com/charmbracelet/bubbles/help"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/stretchr/testify/assert"
-	"github.com/yashodhanketkar/arsg/db"
+	"github.com/yashodhanketkar/arsg/src/db"
+	"github.com/yashodhanketkar/arsg/src/util"
 )
 
 func helperInitilizeModel(t *testing.T, args ...string) model {
 	t.Helper()
+
+	memDB := util.MockDB(t)
+	origDB := db.ConnectDB
+	db.ConnectDB = func() *sql.DB {
+		return memDB
+	}
+	t.Cleanup(func() {
+		db.ConnectDB = origDB
+	})
+
 	userParameters = setupParameters(args...)
-	return initialModel()
+	return initialModel(memDB)
 }
 
 func TestInit(t *testing.T) {

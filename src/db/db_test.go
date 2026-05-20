@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"testing"
 
-	"github.com/yashodhanketkar/arsg/util"
+	"github.com/yashodhanketkar/arsg/src/util"
 )
 
 type ratingCtx struct {

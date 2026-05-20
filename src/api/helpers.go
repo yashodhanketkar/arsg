@@ -3,7 +3,7 @@ package api
 import (
 	"fmt"
 
-	"github.com/yashodhanketkar/arsg/util"
+	"github.com/yashodhanketkar/arsg/src/util"
 )
 
 // returns string value or empty string

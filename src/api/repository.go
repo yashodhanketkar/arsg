@@ -4,8 +4,8 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/yashodhanketkar/arsg/db"
-	"github.com/yashodhanketkar/arsg/util"
+	"github.com/yashodhanketkar/arsg/src/db"
+	"github.com/yashodhanketkar/arsg/src/util"
 )
 
 type calcStruct struct {

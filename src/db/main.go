@@ -8,7 +8,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/yashodhanketkar/arsg/util"
+	"github.com/yashodhanketkar/arsg/src/util"
 	_ "modernc.org/sqlite"
 )
 
@@ -22,7 +22,7 @@ var ConnectDB = func() *sql.DB {
 	return db
 }
 
-func InitDB() {
+func InitDB() *sql.DB {
 	var err error
 
 	if tempErr := os.Mkdir(filepath.Dir(basePath), 0755); !os.IsExist(tempErr) {
@@ -33,8 +33,9 @@ func InitDB() {
 		log.Fatal(err)
 	}
 
-	defer DB.Close()
 	util.CreateTables(DB, filepath.Join(basePath, "schema/arsg.sql"))
+
+	return DB
 }
 
 func addRating(tx *sql.Tx, ratings Rating) (int64, error) {

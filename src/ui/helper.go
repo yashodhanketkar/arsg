@@ -10,8 +10,8 @@ import (
 	"github.com/atotto/clipboard"
 	"github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/yashodhanketkar/arsg/db"
-	"github.com/yashodhanketkar/arsg/util"
+	"github.com/yashodhanketkar/arsg/src/db"
+	"github.com/yashodhanketkar/arsg/src/util"
 
 	tea "github.com/charmbracelet/bubbletea"
 )
@@ -218,9 +218,7 @@ func (m model) buttonCommands() (tea.Model, tea.Cmd) {
 	switch m.focusIndex {
 	case l:
 		if m.score >= 0.1 && m.inputs[0].Value() != "" {
-			DB := db.ConnectDB()
-			defer DB.Close()
-			db.AddRatings(DB, m.prepareRating(), m.contentType)
+			db.AddRatings(m.DB, m.prepareRating(), m.contentType)
 			m.copyToClipboard()
 			m.resetInputs()
 			m.view = 1
@@ -244,12 +242,10 @@ func (m model) buttonCommands() (tea.Model, tea.Cmd) {
 	}
 }
 
-func resetScoreList(contentType string) []list.Item {
+func (m *model) resetScoreList(contentType string) []list.Item {
 	ratingList := []list.Item{}
-	DB := db.ConnectDB()
-	defer DB.Close()
 
-	for _, rating := range db.ListRatings(DB, contentType) {
+	for _, rating := range db.ListRatings(m.DB, contentType) {
 		ratingList = append(ratingList, item{
 			id:         rating.ID,
 			title:      rating.Name,
@@ -284,7 +280,7 @@ func (m *model) toggleContentType() string {
 
 func (m *model) buildScoreList() {
 	// generates an array of score with respect to the current content type
-	m.ratings = list.New(resetScoreList(m.contentType),
+	m.ratings = list.New(m.resetScoreList(m.contentType),
 		list.NewDefaultDelegate(), 128, 0)
 	m.ratings.Title = "Ratings for " + m.contentType
 }

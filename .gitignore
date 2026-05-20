@@ -57,3 +57,4 @@ sonar-project.properties
 local/
 
 tmp/
+.air.toml

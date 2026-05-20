@@ -1,6 +1,7 @@
 package ui
 
 import (
+	"database/sql"
 	"fmt"
 	"os"
 
@@ -10,7 +11,7 @@ import (
 	"github.com/charmbracelet/bubbles/textinput"
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/yashodhanketkar/arsg/util"
+	"github.com/yashodhanketkar/arsg/src/util"
 )
 
 var userParameters []string
@@ -29,14 +30,16 @@ type model struct {
 	lastview    int
 	viewport    viewport.Model
 	contentType string
+	DB          *sql.DB
 }
 
-func initialModel() model {
+func initialModel(DB *sql.DB) model {
 	parameters := userParameters
 	m := model{
 		inputs: make([]textinput.Model, len(parameters)+2),
 	}
 
+	m.DB = DB
 	m.scoreMode = 0
 	m.keys = util.AppKeys
 	m.help = help.New()
@@ -112,10 +115,10 @@ func (m model) View() (view string) {
 	return view
 }
 
-func TeaUI(args ...string) {
+func TeaUI(db *sql.DB, args ...string) {
 	userParameters = setupParameters(args...)
 
-	if _, err := tea.NewProgram(initialModel()).Run(); err != nil {
+	if _, err := tea.NewProgram(initialModel(db)).Run(); err != nil {
 		fmt.Printf("could not start program: %s\n", err)
 		os.Exit(1)
 	}

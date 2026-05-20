@@ -2,6 +2,7 @@ package util
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -60,42 +61,50 @@ func CapitalizeFirstLetter(args ...string) (string, error) {
 	return string(runes), nil
 }
 
-func LoadConfig(config *ConfigType) {
+func LoadConfig(config *ConfigType) error {
 	configPath := filepath.Join(os.Getenv("HOME"), ".config", "arsg", "config.json")
 
 	file, err := os.ReadFile(configPath)
 	if err != nil {
-		fmt.Println("could not open config file:", err)
-		os.Exit(1)
+		return errors.New("could not open config file: " + err.Error())
 	}
 
 	if err := json.Unmarshal(file, &config); err != nil {
-		fmt.Println("could not unmarshal config file:", err)
+		return errors.New("could not unmarshal config file: " + err.Error())
 	}
 
 	handleParameters(config)
 	handleExportPath(config)
+
+	return nil
 }
 
-func handleParameters(config *ConfigType) {
-	var params = make([]string, 0)
+func handleParameters(config *ConfigType) []ParamType {
+	var params []ParamType
 
 	if len(config.Parameters) == 0 {
 		config.Parameters = defaultConfigParams
-		return
+		return defaultConfigParams
 	}
 
 	for _, p := range config.Parameters {
-		for k := range p {
-			params = append(params, k)
-		}
+		params = append(params, p)
 	}
+
+	return params
 }
 
 func handleExportPath(config *ConfigType) {
+	home := os.Getenv("HOME")
+
 	if config.ExportPath == "" {
-		config.ExportPath = filepath.Join(os.Getenv("HOME"), "temp", "export.json")
-	} else {
-		config.ExportPath = filepath.Join(os.Getenv("HOME"), config.ExportPath)
+		config.ExportPath = filepath.Join(home, "temp", "export.json")
+		return
 	}
+
+	if filepath.IsAbs(config.ExportPath) {
+		return
+	}
+
+	config.ExportPath = filepath.Join(home, config.ExportPath)
 }

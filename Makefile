@@ -5,7 +5,7 @@ default: help
 
 # INFO: Project commands
 run:
-	@go run main/main.go
+	@go run src/main.go
 
 start:
 	@./build/arsg
@@ -15,7 +15,7 @@ startclean: build
 
 build: test clean
 	@mkdir -p build
-	@go build -buildmode=exe -o ./build/arsg -trimpath ./main/main.go
+	@go build -buildmode=exe -o ./build/arsg -trimpath src/main.go
 	@upx --best --lzma ./build/arsg
 
 install: build

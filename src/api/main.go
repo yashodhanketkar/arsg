@@ -7,7 +7,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
-	"github.com/yashodhanketkar/arsg/db"
+	"github.com/yashodhanketkar/arsg/src/db"
 )
 
 func Serve() {

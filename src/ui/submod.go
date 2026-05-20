@@ -8,8 +8,8 @@ import (
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/yashodhanketkar/arsg/db"
-	"github.com/yashodhanketkar/arsg/util"
+	"github.com/yashodhanketkar/arsg/src/db"
+	"github.com/yashodhanketkar/arsg/src/util"
 )
 
 const ctrlC = util.CtrlC
@@ -134,9 +134,7 @@ func (m *model) formUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
 			// FIX: Directly calling follwing functions was causing nil pointer error
 			// so they are wrapped for now. will fix this issue later
 			func() {
-				DB := db.ConnectDB()
-				defer DB.Close()
-				db.ExportData(DB, config.ExportPath)
+				db.ExportData(m.DB, config.ExportPath)
 			}()
 			return m, nil
 
