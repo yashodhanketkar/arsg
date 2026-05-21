@@ -50,6 +50,10 @@ func CapitalizeFirstLetter(args ...string) (string, error) {
 		return "", fmt.Errorf("No arguments provided")
 	}
 
+	if args[0] == "" {
+		return "", fmt.Errorf("Empty string provided")
+	}
+
 	str := args[0]
 	if len(str) == 0 {
 		return str, nil

@@ -41,7 +41,12 @@ func (bc calcStruct) parseAndValidate() ([4]float32, error) {
 
 // get calculated rating
 func (bc calcStruct) getCalc(v [4]float32) (float32, error) {
-	return util.Calculator(&util.ConfigType{}, v[0], v[1], v[2], v[3])
+
+	// NOTE: The default max limit (10.0) returns the raw calculation score.
+	// This allows frontend developers to scale or adjust the final score as
+	// needed.
+
+	return util.Calculator(&util.ConfigType{}, 10.0, v[0], v[1], v[2], v[3])
 }
 
 // fomrat output for response

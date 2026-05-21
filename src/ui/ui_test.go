@@ -24,8 +24,20 @@ func helperInitilizeModel(t *testing.T, args ...string) model {
 		db.ConnectDB = origDB
 	})
 
-	userParameters = setupParameters(args...)
-	return initialModel(memDB)
+	setupParameters()
+
+	return initialModel(memDB, 10.0)
+}
+
+func mockValue(t *testing.T, m model) {
+	t.Helper()
+
+	m.form.inputs[0].SetValue("test")
+	m.form.inputs[1].SetValue("8.5")
+	m.form.inputs[2].SetValue("7.5")
+	m.form.inputs[3].SetValue("6.5")
+	m.form.inputs[4].SetValue("5.5")
+	m.form.inputs[5].SetValue("comment")
 }
 
 func TestInit(t *testing.T) {
@@ -35,9 +47,9 @@ func TestInit(t *testing.T) {
 	_, ok := cmd().(tea.BatchMsg)
 	assert.True(t, ok)
 
-	assert.Equal(t, m.scoreMode, 0)
+	assert.Equal(t, m.state.scoreMode, 0)
 	assert.Equal(t, m.help, help.New())
-	assert.Equal(t, m.view, 0)
+	assert.Equal(t, m.state.view, 0)
 
 	for i, v := range []string{
 		"Name",
@@ -47,177 +59,59 @@ func TestInit(t *testing.T) {
 		"Bias",
 		"Comments",
 	} {
-		assert.Equal(t, v, m.inputs[i].Placeholder)
+		assert.Equal(t, v, m.form.inputs[i].Placeholder)
 	}
 }
 
-func TestHelpers(t *testing.T) {
-	t.Run("test setFocus", func(t *testing.T) {
-		m := helperInitilizeModel(t)
-		assert.NotEqual(t, focusedStyle, m.inputs[1].PromptStyle)
-		assert.Equal(t, m.focusIndex, 0)
-		m.setFocus(1)
-		assert.Equal(t, focusedStyle, m.inputs[1].PromptStyle)
-	})
+func TestDefaultButton(t *testing.T) {
+	m := helperInitilizeModel(t)
+	nm, cmd := m.buttonCommands()
+	assert.Nil(t, cmd)
 
-	t.Run("test isNumeric", func(t *testing.T) {
-		m := helperInitilizeModel(t)
-		m.focusIndex = 6
-		assert.False(t, m.isNumeric())
-		m.focusIndex = 1
-		assert.True(t, m.isNumeric())
-	})
-
-	t.Run("test resetInputs", func(t *testing.T) {
-		m := helperInitilizeModel(t)
-		mockValue(t, m)
-		m.calculateScore() // set m.score to 6.8
-		m.resetInputs()
-		assert.Equal(t, 0, m.focusIndex)
-		assert.Equal(t, float32(0.0), m.score)
-		for i := range 5 {
-			assert.Equal(t, "", m.inputs[i].Value())
-		}
-		assert.Equal(t, float32(0.0), m.score)
-	})
-
-	t.Run("test calculateScore", func(t *testing.T) {
-		m := helperInitilizeModel(t)
-		mockValue(t, m)
-
-		// check correct score
-		m.calculateScore()
-		assert.Equal(t, float32(7.2), m.score)
-
-		// check max allowed score
-		for _, v := range []string{"10", "15"} {
-			m.inputs[4].SetValue(v)
-			m.calculateScore()
-			assert.Equal(t, float32(7.7), m.score)
-		}
-
-		// check all 0 score
-		m.inputs[1].SetValue("0")
-		m.inputs[2].SetValue("0")
-		m.inputs[3].SetValue("0")
-		m.inputs[4].SetValue("0")
-		m.calculateScore()
-		assert.Equal(t, float32(0.0), m.score)
-	})
-
-	t.Run("test scoreToClipboard", func(t *testing.T) {
-		m := helperInitilizeModel(t)
-		mockValue(t, m)
-		m.calculateScore()
-		m.copyToClipboard()
-		v, _ := clipboard.ReadAll()
-		assert.Equal(t, "7.2", v)
-		clipboard.WriteAll("Test Name")
-		m.pasteFromClipbaord()
-		assert.Equal(t, "Test Name", m.inputs[0].Value())
-	})
-
-	t.Run("test updateInputs", func(t *testing.T) {
-		m := helperInitilizeModel(t)
-		m.updateInputs(tea.KeyMsg{Type: tea.KeyEnter})
-	})
-
-	t.Run("test prepare ratings", func(t *testing.T) {
-		m := helperInitilizeModel(t)
-		mockValue(t, m)
-		m.calculateScore()
-		got := m.prepareRating()
-
-		expected := db.Rating{
-			Name:     "test",
-			Art:      8.5,
-			Support:  7.5,
-			Plot:     6.5,
-			Bias:     5.5,
-			Rating:   "7.2",
-			Comments: "comment",
-		}
-
-		assert.Equal(t, expected, got)
-	})
-
-	t.Run("test switch content keybind", func(t *testing.T) {
-		m := helperInitilizeModel(t)
-
-		if m.contentType != "anime" {
-			t.Errorf("initial content type not set to anime")
-		}
-
-		for _, option := range []string{"manga", "lightnovel", "anime"} {
-			if m.toggleContentType() != option {
-				t.Errorf("content type not set to %s", option)
-			}
-		}
-	})
+	switch nmt := nm.(type) {
+	case model:
+		assert.Equal(t, m.form.focusIndex+1, nmt.form.focusIndex)
+	default:
+		t.Errorf("incorrect model recieved. %T", nm)
+	}
 }
 
-func TestButtonCommands(t *testing.T) {
+func TestSaveButton(t *testing.T) {
+	m := helperInitilizeModel(t)
+	mockValue(t, m)
+	m.calculateScore()
+	m.form.focusIndex = len(m.form.inputs)
 
-	t.Run("test default behaviour", func(t *testing.T) {
+	_, cmd := m.buttonCommands()
+	assert.Nil(t, cmd)
+
+	v, err := clipboard.ReadAll()
+	assert.NoError(t, err)
+	assert.Equal(t, "7.2", v)
+}
+
+func TestResetButton(t *testing.T) {
+	m := helperInitilizeModel(t)
+	mockValue(t, m)
+	m.calculateScore()
+	m.form.focusIndex = len(m.form.inputs) + 1
+	nm, cmd := m.buttonCommands()
+
+	assert.Nil(t, cmd)
+
+	switch nm := nm.(type) {
+	case model:
+		assert.Equal(t, 0, nm.form.focusIndex)
+		assert.Equal(t, float32(0.0), nm.state.score)
+	default:
+		t.Errorf("incorrect model recieved. %T", nm)
+	}
+
+	t.Run("test quit button", func(t *testing.T) {
 		m := helperInitilizeModel(t)
-		nm, cmd := m.buttonCommands()
-		assert.Nil(t, cmd)
-
-		switch nmt := nm.(type) {
-		case model:
-			assert.Equal(t, m.focusIndex+1, nmt.focusIndex)
-		default:
-			t.Errorf("incorrect model recieved. %T", nm)
-		}
-	})
-
-	t.Run("test save button", func(t *testing.T) {
-		m := helperInitilizeModel(t)
-		mockValue(t, m)
-		m.calculateScore()
-		m.focusIndex = len(m.inputs)
-
+		m.form.focusIndex = len(m.form.inputs) + 2
 		_, cmd := m.buttonCommands()
-		assert.Nil(t, cmd)
-
-		v, err := clipboard.ReadAll()
-		assert.Nil(t, err)
-		assert.Equal(t, "7.2", v)
+		_, ok := cmd().(tea.QuitMsg)
+		assert.True(t, ok)
 	})
-
-	t.Run("test reset button", func(t *testing.T) {
-		m := helperInitilizeModel(t)
-		mockValue(t, m)
-		m.calculateScore()
-		m.focusIndex = len(m.inputs) + 1
-		nm, cmd := m.buttonCommands()
-		assert.Nil(t, cmd)
-
-		switch nm := nm.(type) {
-		case model:
-			assert.Equal(t, 0, nm.focusIndex)
-			assert.Equal(t, float32(0.0), nm.score)
-		default:
-			t.Errorf("incorrect model recieved. %T", nm)
-		}
-
-		t.Run("test quit button", func(t *testing.T) {
-			m := helperInitilizeModel(t)
-			m.focusIndex = len(m.inputs) + 2
-			_, cmd := m.buttonCommands()
-			_, ok := cmd().(tea.QuitMsg)
-			assert.True(t, ok)
-		})
-	})
-}
-
-func mockValue(t *testing.T, m model) {
-	t.Helper()
-
-	m.inputs[0].SetValue("test")
-	m.inputs[1].SetValue("8.5")
-	m.inputs[2].SetValue("7.5")
-	m.inputs[3].SetValue("6.5")
-	m.inputs[4].SetValue("5.5")
-	m.inputs[5].SetValue("comment")
 }

@@ -16,38 +16,84 @@ import (
 
 var userParameters []string
 
-type model struct {
-	focusIndex  int
-	inputs      []textinput.Model
-	cursorMode  cursor.Mode
-	scoreMode   int
-	score       float32
-	help        help.Model
-	keys        util.KeyMap
-	view        int
-	ratings     list.Model
-	docs        string
-	lastview    int
-	viewport    viewport.Model
-	contentType string
-	DB          *sql.DB
+type FormModel struct {
+	focusIndex int
+	inputs     []textinput.Model
+	cursorMode cursor.Mode
 }
 
-func initialModel(DB *sql.DB) model {
-	parameters := userParameters
-	m := model{
-		inputs: make([]textinput.Model, len(parameters)+2),
+type ViewerModel struct {
+	docs        string
+	viewport    viewport.Model
+	contentType string
+}
+
+type StateModel struct {
+	// Global & router
+	view     int
+	lastview int
+	DB       *sql.DB
+	exitMsg  string
+
+	// score
+	scoreMode int
+	score     float32
+	limiter   float32
+}
+
+type model struct {
+	// state
+	state StateModel
+
+	// shared elements
+	help help.Model
+	keys util.KeyMap
+
+	// internal model
+	form    FormModel
+	viewer  ViewerModel
+	ratings list.Model
+}
+
+func initialModel(DB *sql.DB, limiter float32, args ...string) model {
+	parameters, err := setupParameters(args...)
+
+	if err != nil {
+		m := model{state: StateModel{exitMsg: err.Error()}}
+		tea.Quit()
+		return m
 	}
 
-	m.DB = DB
-	m.scoreMode = 0
+	m := model{form: FormModel{inputs: make([]textinput.Model, len(parameters)+2)}}
+
 	m.keys = util.AppKeys
 	m.help = help.New()
-	m.view = 0
-	m.contentType = "anime"
+
+	m.state = StateModel{
+		DB:        DB,
+		scoreMode: 0,
+		view:      0,
+		limiter:   limiter,
+		exitMsg:   "",
+	}
+
+	content, err := m.loadDocs()
+	if err != nil {
+		m.state.exitMsg = err.Error()
+		tea.Quit()
+	}
+
+	viewPort := viewport.New(128, 24)
+	viewPort.SetContent(content)
+
+	m.viewer = ViewerModel{
+		contentType: "anime",
+		docs:        content,
+		viewport:    viewPort,
+	}
 
 	var t textinput.Model
-	for i := range m.inputs {
+	for i := range m.form.inputs {
 
 		t = textinput.New()
 		t.Cursor.Style = cursorStyle
@@ -68,13 +114,8 @@ func initialModel(DB *sql.DB) model {
 			t.CharLimit = 5
 		}
 
-		m.inputs[i] = t
+		m.form.inputs[i] = t
 	}
-
-	content := m.loadDocs()
-	m.docs = content
-	m.viewport = viewport.New(128, 24)
-	m.viewport.SetContent(m.docs)
 
 	return m
 }
@@ -84,7 +125,7 @@ func (m model) Init() tea.Cmd {
 }
 
 func (m model) Update(msg tea.Msg) (md tea.Model, cmd tea.Cmd) {
-	switch m.view {
+	switch m.state.view {
 	case 0:
 		md, cmd = m.formUpdate(msg)
 	case 1:
@@ -99,7 +140,7 @@ func (m model) Update(msg tea.Msg) (md tea.Model, cmd tea.Cmd) {
 }
 
 func (m model) View() (view string) {
-	switch m.view {
+	switch m.state.view {
 	case 0:
 		view = m.formView()
 	case 1:
@@ -116,9 +157,7 @@ func (m model) View() (view string) {
 }
 
 func TeaUI(db *sql.DB, args ...string) {
-	userParameters = setupParameters(args...)
-
-	if _, err := tea.NewProgram(initialModel(db)).Run(); err != nil {
+	if _, err := tea.NewProgram(initialModel(db, 9.4, args...)).Run(); err != nil {
 		fmt.Printf("could not start program: %s\n", err)
 		os.Exit(1)
 	}

@@ -14,7 +14,7 @@ import (
 	"github.com/yashodhanketkar/arsg/src/util"
 )
 
-func handleMocker(t *testing.T) *chi.Mux {
+func handleMocker(t *testing.T) (*chi.Mux, *Server) {
 	t.Helper()
 
 	memDB := util.MockDB(t)
@@ -70,11 +70,11 @@ func handleMocker(t *testing.T) *chi.Mux {
 	r := chi.NewRouter()
 	ratingRouter(r, s.db)
 
-	return r
+	return r, s
 }
 
 func TestRatingRouter(t *testing.T) {
-	r := handleMocker(t)
+	r, _ := handleMocker(t)
 	tests := []struct {
 		name           string
 		method         string
@@ -126,7 +126,7 @@ func TestRatingRouter(t *testing.T) {
 }
 
 func TestListHandler(t *testing.T) {
-	r := handleMocker(t)
+	r, _ := handleMocker(t)
 
 	t.Run("should result in 200 and correct output", func(t *testing.T) {
 		tests := []struct {
@@ -217,7 +217,7 @@ func TestListHandler(t *testing.T) {
 }
 
 func TestCalcHadler(t *testing.T) {
-	r := handleMocker(t)
+	r, _ := handleMocker(t)
 
 	t.Run("should result in 200 and correct output", func(t *testing.T) {
 		tests := []struct {
@@ -360,7 +360,7 @@ func TestCalcHadler(t *testing.T) {
 }
 
 func TestAddHandler(t *testing.T) {
-	r := handleMocker(t)
+	r, _ := handleMocker(t)
 
 	t.Run("should result in 201 and correct output", func(t *testing.T) {
 		tests := []struct {

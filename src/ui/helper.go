@@ -95,56 +95,56 @@ var (
 )
 
 func (m *model) setFocus(index int) (tea.Model, tea.Cmd) {
-	cmds := make([]tea.Cmd, len(m.inputs))
-	for i := 0; i <= len(m.inputs)-1; i++ {
+	cmds := make([]tea.Cmd, len(m.form.inputs))
+	for i := 0; i <= len(m.form.inputs)-1; i++ {
 		if i == index {
 			// Set focused state
-			cmds[i] = m.inputs[i].Focus()
-			m.inputs[i].PromptStyle = focusedStyle
-			m.inputs[i].TextStyle = focusedStyle
+			cmds[i] = m.form.inputs[i].Focus()
+			m.form.inputs[i].PromptStyle = focusedStyle
+			m.form.inputs[i].TextStyle = focusedStyle
 			continue
 		}
 		// Remove focused state
-		m.inputs[i].Blur()
-		m.inputs[i].PromptStyle = noStyle
-		m.inputs[i].TextStyle = noStyle
+		m.form.inputs[i].Blur()
+		m.form.inputs[i].PromptStyle = noStyle
+		m.form.inputs[i].TextStyle = noStyle
 	}
 
 	return m, tea.Batch(cmds...)
 }
 
 func (m model) isNumeric() bool {
-	return m.focusIndex > 0 && m.focusIndex < 5
+	return m.form.focusIndex > 0 && m.form.focusIndex < 5
 }
 
 func (m *model) resetInputs() tea.Cmd {
-	cmds := make([]tea.Cmd, len(m.inputs))
+	cmds := make([]tea.Cmd, len(m.form.inputs))
 
-	for i := range m.inputs {
-		m.inputs[i].Reset()
-		m.inputs[i].Blur()
-		m.inputs[i].PromptStyle = noStyle
-		m.inputs[i].TextStyle = noStyle
+	for i := range m.form.inputs {
+		m.form.inputs[i].Reset()
+		m.form.inputs[i].Blur()
+		m.form.inputs[i].PromptStyle = noStyle
+		m.form.inputs[i].TextStyle = noStyle
 	}
 
-	m.focusIndex = 0
-	m.setFocus(m.focusIndex)
+	m.form.focusIndex = 0
+	m.setFocus(m.form.focusIndex)
 	m.calculateScore()
 
 	return tea.Batch(cmds...)
 }
 
 func (m *model) updateInputs(msg tea.Msg) tea.Cmd {
-	cmds := make([]tea.Cmd, len(m.inputs))
+	cmds := make([]tea.Cmd, len(m.form.inputs))
 
-	for i := range m.inputs {
-		m.inputs[i], cmds[i] = m.inputs[i].Update(msg)
+	for i := range m.form.inputs {
+		m.form.inputs[i], cmds[i] = m.form.inputs[i].Update(msg)
 
 		switch i {
 		case 0, 5:
-			m.inputs[i].SetValue(m.inputs[i].Value())
+			m.form.inputs[i].SetValue(m.form.inputs[i].Value())
 		default:
-			m.inputs[i].SetValue(util.GetNumericInput(m.inputs[i].Value()))
+			m.form.inputs[i].SetValue(util.GetNumericInput(m.form.inputs[i].Value()))
 		}
 	}
 
@@ -154,15 +154,15 @@ func (m *model) updateInputs(msg tea.Msg) tea.Cmd {
 func (m *model) calculateScore() {
 	config := util.ConfigType{}
 	util.LoadConfig(&config)
-	parameters := make([]float32, len(m.inputs)-2)
+	parameters := make([]float32, len(m.form.inputs)-2)
 	allValid := true
 
-	for i := range m.inputs {
+	for i := range m.form.inputs {
 		if i == 0 || i == len(config.Parameters)+1 {
 			continue
 		}
 
-		if val, err := strconv.ParseFloat(m.inputs[i].Value(), 32); err == nil {
+		if val, err := strconv.ParseFloat(m.form.inputs[i].Value(), 32); err == nil {
 			if val > 10.0 {
 				parameters[i-1] = float32(10)
 			} else {
@@ -176,20 +176,20 @@ func (m *model) calculateScore() {
 	if allValid {
 		m.validator(&config, parameters...)
 	} else {
-		m.score = 0
+		m.state.score = 0
 	}
 }
 
 func (m *model) validator(config *util.ConfigType, parameters ...float32) {
-	if score, err := util.Calculator(config, parameters...); err == nil {
-		m.score = util.SystemCalculator(scoreSystem[m.scoreMode], score)
+	if score, err := util.Calculator(config, m.state.limiter, parameters...); err == nil {
+		m.state.score = util.SystemCalculator(scoreSystem[m.state.scoreMode], score)
 	} else {
-		m.score = 0
+		m.state.score = 0
 	}
 }
 
 func (m *model) copyToClipboard() {
-	clipboard.WriteAll(fmt.Sprintf("%.1f", m.score))
+	clipboard.WriteAll(fmt.Sprintf("%.1f", m.state.score))
 }
 
 func (m *model) pasteFromClipbaord() {
@@ -198,33 +198,33 @@ func (m *model) pasteFromClipbaord() {
 		return
 	}
 
-	m.inputs[m.focusIndex].SetValue(copiedText)
+	m.form.inputs[m.form.focusIndex].SetValue(copiedText)
 }
 
 func (m model) prepareRating() db.Rating {
 	return db.Rating{
-		Name:     m.inputs[0].Value(),
-		Art:      util.FloatParser(m.inputs[1].Value()),
-		Support:  util.FloatParser(m.inputs[2].Value()),
-		Plot:     util.FloatParser(m.inputs[3].Value()),
-		Bias:     util.FloatParser(m.inputs[4].Value()),
-		Rating:   fmt.Sprintf("%.1f", m.score),
-		Comments: m.inputs[5].Value(),
+		Name:     m.form.inputs[0].Value(),
+		Art:      util.FloatParser(m.form.inputs[1].Value()),
+		Support:  util.FloatParser(m.form.inputs[2].Value()),
+		Plot:     util.FloatParser(m.form.inputs[3].Value()),
+		Bias:     util.FloatParser(m.form.inputs[4].Value()),
+		Rating:   fmt.Sprintf("%.1f", m.state.score),
+		Comments: m.form.inputs[5].Value(),
 	}
 }
 
 func (m model) buttonCommands() (tea.Model, tea.Cmd) {
-	l := len(m.inputs)
-	switch m.focusIndex {
+	l := len(m.form.inputs)
+	switch m.form.focusIndex {
 	case l:
-		if m.score >= 0.1 && m.inputs[0].Value() != "" {
-			db.AddRatings(m.DB, m.prepareRating(), m.contentType)
+		if m.state.score >= 0.1 && m.form.inputs[0].Value() != "" {
+			db.AddRatings(m.state.DB, m.prepareRating(), m.viewer.contentType)
 			m.copyToClipboard()
 			m.resetInputs()
-			m.view = 1
+			m.state.view = 1
 		} else {
-			m.focusIndex = 0
-			m.setFocus(m.focusIndex)
+			m.form.focusIndex = 0
+			m.setFocus(m.form.focusIndex)
 		}
 		return m, nil
 
@@ -236,8 +236,8 @@ func (m model) buttonCommands() (tea.Model, tea.Cmd) {
 		return m, tea.Quit
 
 	default:
-		m.focusIndex++
-		m.setFocus(m.focusIndex)
+		m.form.focusIndex++
+		m.setFocus(m.form.focusIndex)
 		return m, nil
 	}
 }
@@ -245,7 +245,7 @@ func (m model) buttonCommands() (tea.Model, tea.Cmd) {
 func (m *model) resetScoreList(contentType string) []list.Item {
 	ratingList := []list.Item{}
 
-	for _, rating := range db.ListRatings(m.DB, contentType) {
+	for _, rating := range db.ListRatings(m.state.DB, contentType) {
 		ratingList = append(ratingList, item{
 			id:         rating.ID,
 			title:      rating.Name,
@@ -257,47 +257,45 @@ func (m *model) resetScoreList(contentType string) []list.Item {
 	return ratingList
 }
 
-func (m *model) loadDocs() string {
+func (m *model) loadDocs() (string, error) {
 	path := filepath.Join(os.Getenv("HOME"), ".local/share/args/lib/docs/manual.md")
 	content, err := os.ReadFile(path)
 
 	if err != nil {
-		fmt.Println("could not load documentation file:", err)
-		os.Exit(1)
+		return "", err
 	}
 
-	return string(content)
+	return string(content), nil
 }
 
 func (m *model) toggleContentType() string {
-	curr := m.contentType
+	curr := m.viewer.contentType
 	// circularly iterates through the content types
-	m.contentType = avalCType[(slices.Index(avalCType, curr)+1)%len(avalCType)]
+	m.viewer.contentType = avalCType[(slices.Index(avalCType, curr)+1)%len(avalCType)]
 	m.buildScoreList()
 
-	return m.contentType
+	return m.viewer.contentType
 }
 
 func (m *model) buildScoreList() {
 	// generates an array of score with respect to the current content type
-	m.ratings = list.New(m.resetScoreList(m.contentType),
+	m.ratings = list.New(m.resetScoreList(m.viewer.contentType),
 		list.NewDefaultDelegate(), 128, 0)
-	m.ratings.Title = "Ratings for " + m.contentType
+	m.ratings.Title = "Ratings for " + m.viewer.contentType
 }
 
-func setupParameters(args ...string) []string {
+func setupParameters(args ...string) ([]string, error) {
 	if len(args) == 0 {
-		return []string{"Art/Animation", "Character/Cast", "Plot", "Bias"}
+		return []string{"Art/Animation", "Character/Cast", "Plot", "Bias"}, nil
 	}
 
 	for i, arg := range args {
 		val, err := util.CapitalizeFirstLetter(arg)
 		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
+			return nil, err
 		}
 		args[i] = val
 	}
 
-	return args
+	return args, nil
 }

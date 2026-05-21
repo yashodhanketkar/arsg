@@ -2,6 +2,8 @@ package db
 
 import (
 	"database/sql"
+	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -11,6 +13,20 @@ import (
 type ratingCtx struct {
 	id       int64
 	ratingId int64
+}
+
+func TestEnv(t *testing.T) {
+	env := os.Getenv("GO_ENV")
+	os.Setenv("GO_ENV", "dev")
+	defer os.Setenv("GO_ENV", env)
+
+	setPaths("dev")
+	assert.Equal(t, filepath.Join(os.Getenv("PWD"), "dev-workspace/lib/"), basePath)
+
+	setPaths("prod")
+	assert.Equal(t, filepath.Join(os.Getenv("HOME"), ".local/share/args/lib"), basePath)
+
+	assert.Panics(t, func() { setPaths("invalid") })
 }
 
 func TestAddListRatings(t *testing.T) {

@@ -89,7 +89,7 @@ func TestCapitalizeFirstLetter(t *testing.T) {
 			name: "empty string",
 			args: []string{""},
 			want: "",
-			err:  nil,
+			err:  fmt.Errorf("Empty string provided"),
 		},
 		{
 			name: "single character string",
