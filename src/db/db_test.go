@@ -16,17 +16,48 @@ type ratingCtx struct {
 }
 
 func TestEnv(t *testing.T) {
-	env := os.Getenv("GO_ENV")
-	os.Setenv("GO_ENV", "dev")
-	defer os.Setenv("GO_ENV", env)
+	t.Run("test for valid modes", func(t *testing.T) {
+		tests := []struct {
+			name string
+			mode string
+			want string
+		}{{
+			name: "test dev mode",
+			mode: "dev",
+			want: filepath.Join(os.Getenv("PWD"), "dev-workspace/lib/"),
+		}, {
+			name: "test prod mode",
+			mode: "prod",
+			want: filepath.Join(os.Getenv("HOME"), ".local/share/args/lib"),
+		}}
 
-	setPaths("dev")
-	assert.Equal(t, filepath.Join(os.Getenv("PWD"), "dev-workspace/lib/"), basePath)
+		for _, tt := range tests {
+			t.Run(tt.name, func(t *testing.T) {
+				setPaths(tt.mode)
+				assert.Equal(t, tt.want, basePath)
+			})
+		}
+	})
 
-	setPaths("prod")
-	assert.Equal(t, filepath.Join(os.Getenv("HOME"), ".local/share/args/lib"), basePath)
+	t.Run("test for invalid modes", func(t *testing.T) {
+		tests := []struct {
+			name string
+			mode string
+			want string
+		}{{
+			name: "test invlid mode",
+			mode: "invalid",
+		}, {
+			name: "test empty mode",
+			mode: "",
+		}}
 
-	assert.Panics(t, func() { setPaths("invalid") })
+		for _, tt := range tests {
+			t.Run(tt.name, func(t *testing.T) {
+				assert.Panics(t, func() { setPaths(tt.mode) })
+			})
+		}
+	})
 }
 
 func TestAddListRatings(t *testing.T) {

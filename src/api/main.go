@@ -19,7 +19,7 @@ type CalcResponse struct {
 	Rating   float32 `json:"rating"`
 }
 
-func Serve(DB *sql.DB) {
+func Serve(DB *sql.DB, port string) {
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
@@ -31,8 +31,12 @@ func Serve(DB *sql.DB) {
 	// main router
 	ratingRouter(r, DB)
 
+	if port == "" {
+		port = ":5000"
+	}
+
 	// start server
-	if err := http.ListenAndServe(":5000", r); err != nil {
+	if err := http.ListenAndServe(port, r); err != nil {
 		log.Fatal(err)
 	}
 }

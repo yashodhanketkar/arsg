@@ -17,7 +17,7 @@ func helperInitilizeModel(t *testing.T, args ...string) model {
 
 	memDB := util.MockDB(t)
 	origDB := db.ConnectDB
-	db.ConnectDB = func() *sql.DB {
+	db.ConnectDB = func(_ string) *sql.DB {
 		return memDB
 	}
 	t.Cleanup(func() {

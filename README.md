@@ -9,12 +9,19 @@ Table of Content
 -	[ARSG](#arsg)
 	-	[Table of Content](#table-of-content)
 	-	[Features](#features)
-	-	[Keybinds](#keybinds)
-	-	[Installation and Execution](#installation-and-execution)
+	-	[Key bindings (UI mode):](#key-bindings-ui-mode)
+	-	[Endpoints (REST API mode):](#endpoints-rest-api-mode)
+		-	[GET /list/{content\_type}](#get-listcontent_type)
+		-	[POST /calc](#post-calc)
+		-	[POST /add/{content\_type}](#post-addcontent_type)
+			-	[Note:](#note)
+	-	[Installation](#installation)
+	-	[Usage](#usage)
 	-	[TODO](#todo)
 		-	[Phase 1](#phase-1)
 		-	[Phase 2](#phase-2)
 		-	[Phase 3](#phase-3)
+		-	[Phase 4](#phase-4)
 	-	[License](#license)
 
 Features
@@ -24,8 +31,10 @@ Features
 
 -	Personalized & Biased Scoring: A unique feature of this tool is its ability to include user biases based on personal tastes, allowing the generated scores to reflect the personality and preferences of the list author, making each list truly unique.
 
-Keybinds
---------
+-	UI and REST API modes: The application can be run in either UI or REST API mode, providing users with the flexibility to choose the mode that best suits their needs.
+
+Key bindings (UI mode):
+-----------------------
 
 | Key                                  | Action                                              |
 |--------------------------------------|-----------------------------------------------------|
@@ -43,8 +52,48 @@ Keybinds
 | <kbd>CTRL</kbd> <kbd>s</kbd>         | Switch scoring system                               |
 | <kbd>CTRL</kbd> <kbd>r</kbd>         | Switch cursor mode                                  |
 
-Installation and Execution
+Endpoints (REST API mode):
 --------------------------
+
+### GET /list/{content_type}
+
+Returns a list of ratings for a given `content_type`.
+
+### POST /calc
+
+Returns a calculated rating without saving it to the database.
+
+Requires a JSON body refer to Note section.
+
+### POST /add/{content_type}
+
+Calculates and stores a rating for a given `content_type` in the database.
+
+Requires a JSON body refer to Note section.
+
+#### Note:
+
+-	Valid `content_type` are
+
+	-	anime
+	-	manga
+	-	lightnovel.
+
+-	Valid request body for calc and add endpoints.
+
+	```ts
+	{
+	title: string,
+	comments: string,  /* (optional) */
+	art: string,
+	cast: string,
+	plot: string,
+	bias: string
+	}
+	```
+
+Installation
+------------
 
 1.	Install the latest version of Go (Golang):
 
@@ -74,11 +123,9 @@ Installation and Execution
 
 		```sh
 		# For Windows
-
 		go build main/main.go
 
 		# For Linux/Mac
-
 		go build ./main/main.go
 		```
 
@@ -92,24 +139,41 @@ Installation and Execution
 
 Once the application is successfully compiled, an executable file will be generated, which you can use for future runs without needing to recompile.
 
+Usage
+-----
+
+The application can be run in two modes: UI mode and REST API mode.
+
+```sh
+# To start the application in UI mode, run the following command:
+./build/arsg ui --mode {dev, prod}
+
+# To start the application in UI mode, run the following command:
+./build/arsg rest --mode {dev, prod} --port {port number}
+
+Note:
+--mode: dev or prod (default: prod)
+--port: port number (default: 5000)
+```
+
 TODO
 ----
 
 ### Phase 1
 
--	[X] Build a simple 4-parameter scoring system, with bias as the fourth parameter.
--	[X] Create test cases and a score converter for sites based on user preferences.
+-	[x] Build a simple 4-parameter scoring system, with bias as the fourth parameter.
+-	[x] Create test cases and a score converter for sites based on user preferences.
 
 ### Phase 2
 
--	[X] Enable the application to export JSON files
--	[X] Add a UI-based control system.
--	[X] Provide executable releases.
+-	[x] Enable the application to export JSON files
+-	[x] Add a UI-based control system.
+-	[x] Provide executable releases.
 
 ### Phase 3
 
 -	[ ] Make the system more customizable by allowing users to add or remove parameters.
--	[X] Include in-application documentation.
+-	[x] Include in-application documentation.
 
 ### Phase 4
 
@@ -119,4 +183,4 @@ TODO
 License
 -------
 
-[MIT](LICENSE)
+This project is licensed under the [GNU GPLv3.0 License](./LICENSE) - see the [license](./LICENSE) file for details.

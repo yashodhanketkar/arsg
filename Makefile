@@ -5,7 +5,10 @@ default: help
 
 # INFO: Project commands
 run:
-	@go run src/main.go
+	@go run src/main.go ui --mode dev
+
+run-rest:
+	@go run src/main.go rest --mode dev
 
 start:
 	@./build/arsg
@@ -18,6 +21,10 @@ build: test clean
 	@go build -buildmode=exe -o ./build/arsg -trimpath src/main.go
 	@upx --best --lzma ./build/arsg
 
+build-dev: clean
+	@mkdir -p build
+	@go build -o build/arsg  src/main.go
+
 install: build
 	@chmod a+x ./scripts/install.sh
 	@./scripts/install.sh
@@ -26,32 +33,31 @@ uninstall:
 	@chmod a+x ./scripts/install.sh
 	@./scripts/uninstall.sh
 
-commit: add
-	@git commit
-
-add: test
-	@git add .
-
 test:
 	@go test ./...
-
-clean:
-	@rm -rf ./build/
-
-getcover: cover
-	@go tool cover -html=./out/coverage.out -o ./out/coverage.html
 
 cover:
 	@mkdir -p out
 	@go test -coverprofile=./out/coverage.out ./...
 
+
+getcover: cover
+	@go tool cover -html=./out/coverage.out -o ./out/coverage.html
+
+clean:
+	@rm -rf ./build/
+
 help:
 	@echo "run       run the app"
-	@echo "start     build and run the app"
+	@echo "run-rest  run the rest api"
+	@echo "start     start the app"
+	@echo "startclean start the app and clean the build folder"
 	@echo "build     build the app"
-	@echo "commit    commit the changes"
-	@echo "add       add the changes"
-	@echo "test      run tests"
-	@echo "clean     clean the build directory"
+	@echo "build-dev build the app for development"
+	@echo "install   install the app"
+	@echo "uninstall uninstall the app"
+	@echo "test      run the tests"
+	@echo "cover     run the tests and get the coverage report"
 	@echo "getcover  get the coverage report"
-	@echo "cover     run the tests and generate the coverage report"
+	@echo "clean     clean the build folder"
+	@echo "help      show this help message"
