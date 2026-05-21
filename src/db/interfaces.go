@@ -8,25 +8,23 @@ import (
 
 var (
 	DB       *sql.DB
-	env      = os.Getenv("GO_ENV")
 	basePath string
 	dbPath   string
+	env      = ""
 )
-
-func init() {
-	setPaths(env)
-}
 
 func setPaths(environment string) {
 	switch environment {
 	case "dev":
-		basePath = filepath.Join(os.Getenv("PWD"), "dev-workspace/lib/")
+		basePath = filepath.Join(os.Getenv("PWD"), "/dev-workspace/lib/")
+		return
 
 	case "prod":
 		basePath = filepath.Join(os.Getenv("HOME"), ".local/share/args/lib")
+		return
 
 	default:
-		panic("Invalid GO_ENV. Must be either 'dev' or 'prod'")
+		panic("Invalid mode. Only supports 'dev' and 'prod' modes.")
 	}
 }
 

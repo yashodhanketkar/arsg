@@ -12,30 +12,42 @@ import (
 	_ "modernc.org/sqlite"
 )
 
-var ConnectDB = func() *sql.DB {
-	db, err := sql.Open("sqlite", dbPath)
+var ConnectDB = func(mode string) *sql.DB {
+	setPaths(mode)
+	dbPath = filepath.Join(basePath, "arsg.db")
 
-	if err != nil {
-		log.Fatal(err)
+	_, statErr := os.Stat(dbPath)
+
+	if os.IsNotExist(statErr) {
+		DB, err := InitDB()
+		if err != nil {
+			panic(err)
+		}
+
+		return DB
 	}
 
-	return db
+	DB, err := sql.Open("sqlite", dbPath)
+	if err != nil {
+		panic(err)
+	}
+
+	return DB
 }
 
-func InitDB() *sql.DB {
-	var err error
-
+func InitDB() (*sql.DB, error) {
 	if err := os.Mkdir(filepath.Dir(basePath), 0755); !os.IsExist(err) {
-		log.Fatal(err)
+		return nil, err
 	}
 
-	if DB, err = sql.Open("sqlite", dbPath); err != nil {
-		log.Fatal(err)
+	DB, err := sql.Open("sqlite", dbPath)
+	if err != nil {
+		return nil, err
 	}
 
 	util.CreateTables(DB, filepath.Join(basePath, "schema/arsg.sql"))
 
-	return DB
+	return DB, nil
 }
 
 func addRating(tx *sql.Tx, ratings Rating) (int64, error) {
