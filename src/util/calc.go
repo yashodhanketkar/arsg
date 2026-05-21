@@ -5,13 +5,19 @@ import (
 	"math"
 )
 
-func rounder(score float32) float32 {
-	return float32(math.Round(float64(score*10)) / 10)
+func rounder(score float32, limiter float32) float32 {
+	return float32(math.Round(float64(score*limiter)) / 10)
 }
 
-func Calculator(config *ConfigType, args ...float32) (float32, error) {
+func Calculator(config *ConfigType, limiter float32, args ...float32) (float32, error) {
 	if len(args) == 0 {
 		return 0, fmt.Errorf("No input values provided")
+	}
+
+	if limiter > 10.0 {
+		limiter = 10
+	} else if limiter < 1.0 {
+		limiter = 1
 	}
 
 	_, weights := GetParams(config)
@@ -40,5 +46,5 @@ func Calculator(config *ConfigType, args ...float32) (float32, error) {
 		return 0, fmt.Errorf("All zero values provided")
 	}
 
-	return rounder(weightedSum / maxTotal), nil
+	return rounder(weightedSum/maxTotal, limiter), nil
 }

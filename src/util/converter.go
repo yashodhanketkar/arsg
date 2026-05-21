@@ -3,6 +3,7 @@ package util
 import (
 	"math"
 	"strconv"
+	"strings"
 )
 
 func SystemCalculator(systemType string, score float32) float32 {
@@ -48,4 +49,16 @@ func FloatParser(value string) float32 {
 	}
 
 	return parsedFloat
+}
+
+func GetNumericInput(str string) string {
+	var inputBuilder strings.Builder
+
+	for _, r := range str {
+		if strings.ContainsRune("0123456789.", r) {
+			inputBuilder.WriteRune(r)
+		}
+	}
+
+	return inputBuilder.String()
 }

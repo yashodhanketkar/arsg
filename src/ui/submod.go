@@ -8,8 +8,8 @@ import (
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/yashodhanketkar/arsg/db"
-	"github.com/yashodhanketkar/arsg/util"
+	"github.com/yashodhanketkar/arsg/src/db"
+	"github.com/yashodhanketkar/arsg/src/util"
 )
 
 const ctrlC = util.CtrlC
@@ -24,12 +24,12 @@ func (m *model) confirmUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Batch(tea.ExitAltScreen, tea.Quit)
 
 		case "f1":
-			m.lastview = m.view
-			m.view = 3
+			m.state.lastview = m.state.view
+			m.state.view = 3
 			return m, nil
 
 		case "enter", " ":
-			m.view = 0
+			m.state.view = 0
 			return m, nil
 		}
 	}
@@ -56,10 +56,10 @@ func (m *model) docUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
 		footerHeight := lipgloss.Height(m.footerView())
 		margins := headerHeight + footerHeight
 
-		m.viewport = viewport.New(msg.Width, msg.Height-margins)
-		m.viewport.YPosition = headerHeight
+		m.viewer.viewport = viewport.New(msg.Width, msg.Height-margins)
+		m.viewer.viewport.YPosition = headerHeight
 
-		_, cmd := m.viewport.Update(msg)
+		_, cmd := m.viewer.viewport.Update(msg)
 
 		return m, cmd
 
@@ -69,25 +69,25 @@ func (m *model) docUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Batch(tea.ExitAltScreen, tea.Quit)
 
 		case "j":
-			m.viewport.LineDown(1)
+			m.viewer.viewport.LineDown(1)
 
 		case "d":
-			m.viewport.HalfViewUp()
+			m.viewer.viewport.HalfViewUp()
 
 		case "k":
-			m.viewport.LineUp(1)
+			m.viewer.viewport.LineUp(1)
 
 		case "u":
-			m.viewport.HalfViewDown()
+			m.viewer.viewport.HalfViewDown()
 
 		case "home":
-			m.viewport.GotoTop()
+			m.viewer.viewport.GotoTop()
 
 		case "end":
-			m.viewport.GotoBottom()
+			m.viewer.viewport.GotoBottom()
 
 		case "enter", "f1":
-			m.view = m.lastview
+			m.state.view = m.state.lastview
 			return m, nil
 		}
 	}
@@ -99,7 +99,7 @@ func (m *model) docView() string {
 	var b strings.Builder
 
 	b.WriteString(m.headerView() + "\n")
-	b.WriteString(m.viewport.View())
+	b.WriteString(m.viewer.viewport.View())
 	b.WriteString("\n" + m.footerView())
 
 	return b.String()
@@ -107,13 +107,17 @@ func (m *model) docView() string {
 
 func (m model) headerView() string {
 	title := titleStyle.Render("ARGS")
-	line := focusedStyle.Render(strings.Repeat("─", max(0, m.viewport.Width-lipgloss.Width(title))))
+	line := focusedStyle.Render(
+		strings.Repeat("─", max(0, m.viewer.viewport.Width-lipgloss.Width(title))),
+	)
 	return lipgloss.JoinHorizontal(lipgloss.Center, title, line)
 }
 
 func (m model) footerView() string {
-	info := infoStyle.Render(fmt.Sprintf("%3.f%%", m.viewport.ScrollPercent()*100))
-	line := focusedStyle.Render(strings.Repeat("─", max(0, m.viewport.Width-lipgloss.Width(info))))
+	info := infoStyle.Render(fmt.Sprintf("%3.f%%", m.viewer.viewport.ScrollPercent()*100))
+	line := focusedStyle.Render(
+		strings.Repeat("─", max(0, m.viewer.viewport.Width-lipgloss.Width(info))),
+	)
 	return lipgloss.JoinHorizontal(lipgloss.Center, line, info)
 }
 
@@ -134,19 +138,17 @@ func (m *model) formUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
 			// FIX: Directly calling follwing functions was causing nil pointer error
 			// so they are wrapped for now. will fix this issue later
 			func() {
-				DB := db.ConnectDB()
-				defer DB.Close()
-				db.ExportData(DB, config.ExportPath)
+				db.ExportData(m.state.DB, config.ExportPath)
 			}()
 			return m, nil
 
 		case "home":
-			m.focusIndex = 0
-			return m.setFocus(m.focusIndex)
+			m.form.focusIndex = 0
+			return m.setFocus(m.form.focusIndex)
 
 		case "end":
-			m.focusIndex = len(m.inputs) + 2
-			return m.setFocus(m.focusIndex)
+			m.form.focusIndex = len(m.form.inputs) + 2
+			return m.setFocus(m.form.focusIndex)
 
 		case "ctrl+q":
 			return m, tea.Batch(tea.ExitAltScreen, tea.Quit)
@@ -158,9 +160,9 @@ func (m *model) formUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "f3":
 			// builds score list for the current content type
 			m.buildScoreList()
-			m.view = 2
-			m.focusIndex = 0
-			m.setFocus(m.focusIndex)
+			m.state.view = 2
+			m.form.focusIndex = 0
+			m.setFocus(m.form.focusIndex)
 			return m, nil
 
 		// copy score to clipboard
@@ -179,16 +181,16 @@ func (m *model) formUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.help.ShowAll = !m.help.ShowAll
 
 		case "f1":
-			m.lastview = m.view
-			m.view = 3
+			m.state.lastview = m.state.view
+			m.state.view = 3
 			return m, nil
 
 		// reset focused input
 		case "delete":
-			if m.focusIndex > len(m.inputs)-1 {
+			if m.form.focusIndex > len(m.form.inputs)-1 {
 				break
 			}
-			m.inputs[m.focusIndex].Reset()
+			m.form.inputs[m.form.focusIndex].Reset()
 			return m, nil
 
 		// reset all inputs
@@ -198,20 +200,20 @@ func (m *model) formUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		// Change cursor mode
 		case "ctrl+r":
-			m.cursorMode++
-			if m.cursorMode > cursor.CursorHide {
-				m.cursorMode = cursor.CursorBlink
+			m.form.cursorMode++
+			if m.form.cursorMode > cursor.CursorHide {
+				m.form.cursorMode = cursor.CursorBlink
 			}
-			cmds := make([]tea.Cmd, len(m.inputs))
-			for i := range m.inputs {
-				cmds[i] = m.inputs[i].Cursor.SetMode(m.cursorMode)
+			cmds := make([]tea.Cmd, len(m.form.inputs))
+			for i := range m.form.inputs {
+				cmds[i] = m.form.inputs[i].Cursor.SetMode(m.form.cursorMode)
 			}
 			return m, tea.Batch(cmds...)
 
 		case "ctrl+s":
-			m.scoreMode++
-			if m.scoreMode > 3 {
-				m.scoreMode = 0
+			m.state.scoreMode++
+			if m.state.scoreMode > 3 {
+				m.state.scoreMode = 0
 			}
 
 		// Set focus to next input
@@ -219,7 +221,7 @@ func (m *model) formUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
 			s := msg.String()
 
 			if s == " " {
-				if m.focusIndex != 0 && m.focusIndex != 5 {
+				if m.form.focusIndex != 0 && m.form.focusIndex != 5 {
 					return m.buttonCommands()
 				} else {
 					break
@@ -232,22 +234,22 @@ func (m *model) formUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 			// Cycle indexes
 			if s == "tab" || s == "down" || s == "pgdown" {
-				m.focusIndex++
+				m.form.focusIndex++
 			}
 
 			// Cycle indexes reverse
 			if s == "shift+tab" || s == "up" || s == "pgup" {
-				m.focusIndex--
+				m.form.focusIndex--
 			}
 
 			// handle focus and styles
-			if m.focusIndex > len(m.inputs)+3 {
-				m.focusIndex = 0
-			} else if m.focusIndex < 0 {
-				m.focusIndex = len(m.inputs) + 2
+			if m.form.focusIndex > len(m.form.inputs)+3 {
+				m.form.focusIndex = 0
+			} else if m.form.focusIndex < 0 {
+				m.form.focusIndex = len(m.form.inputs) + 2
 			}
 
-			return m.setFocus(m.focusIndex)
+			return m.setFocus(m.form.focusIndex)
 		}
 	}
 
@@ -263,12 +265,12 @@ func (m *model) formView() string {
 	var b strings.Builder
 	helpView := m.help.View(m.keys)
 
-	b.WriteString(contentStyle.Render("Running for " + m.contentType))
+	b.WriteString(contentStyle.Render("Running for " + m.viewer.contentType))
 	b.WriteString(noStyle.Render("\n"))
 
-	for i := range m.inputs {
-		b.WriteString(m.inputs[i].View())
-		if i < len(m.inputs)-1 {
+	for i := range m.form.inputs {
+		b.WriteString(m.form.inputs[i].View())
+		if i < len(m.form.inputs)-1 {
 			b.WriteRune('\n')
 		}
 	}
@@ -277,31 +279,31 @@ func (m *model) formView() string {
 	restartButton := &blurredButtonRes
 	endButton := &blurredButtonEnd
 
-	if m.focusIndex == len(m.inputs) {
+	if m.form.focusIndex == len(m.form.inputs) {
 		saveButton = &focusedButtonSv
 	}
 
-	if m.focusIndex == len(m.inputs)+1 {
+	if m.form.focusIndex == len(m.form.inputs)+1 {
 		restartButton = &focusedButtonRes
 	}
 
-	if m.focusIndex == len(m.inputs)+2 {
+	if m.form.focusIndex == len(m.form.inputs)+2 {
 		endButton = &focusedButtonEnd
 	}
 
 	b.WriteString("\n\nRating: ")
-	b.WriteString(resultStyle.Render(fmt.Sprintf("%.1f", m.score)))
+	b.WriteString(resultStyle.Render(fmt.Sprintf("%.1f", m.state.score)))
 
 	fmt.Fprintf(&b, "\n\n%s\n", *saveButton)
 	fmt.Fprintf(&b, "%s\n", *restartButton)
 	fmt.Fprintf(&b, "%s\n\n", *endButton)
 
 	b.WriteString(helpStyle.Render("cursor mode is "))
-	b.WriteString(cursorModeHelpStyle.Render(m.cursorMode.String()))
+	b.WriteString(cursorModeHelpStyle.Render(m.form.cursorMode.String()))
 	b.WriteString(helpStyle.Render(" (ctrl+r to change style)"))
 
 	b.WriteString(helpStyle.Render("\nscore mode is "))
-	b.WriteString(cursorModeHelpStyle.Render(scoreSystem[m.scoreMode]))
+	b.WriteString(cursorModeHelpStyle.Render(scoreSystem[m.state.scoreMode]))
 	b.WriteString(helpStyle.Render(" system (ctrl+s to change score system)"))
 
 	b.WriteString(helpStyle.Render("\n"))
@@ -327,17 +329,17 @@ func (m *model) scoreUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Batch(tea.ExitAltScreen, tea.Quit)
 
 		case "f1":
-			m.lastview = m.view
-			m.view = 3
+			m.state.lastview = m.state.view
+			m.state.view = 3
 			return m, nil
 
 		case "ctrl+t":
 			m.toggleContentType()
-			m.view = 2
+			m.state.view = 2
 			return m, nil
 
 		case "f3":
-			m.view = 0
+			m.state.view = 0
 			return m, nil
 		}
 	}

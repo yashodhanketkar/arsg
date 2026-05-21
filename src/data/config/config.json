@@ -5,5 +5,5 @@
     { "Plot": 35 },
     { "Bias": 10 }
   ],
-  "export_path": "export.json"
+  "export_path": "/tmp/export.json"
 }

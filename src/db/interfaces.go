@@ -7,11 +7,28 @@ import (
 )
 
 var (
-	DB *sql.DB
-
-	basePath = filepath.Join(os.Getenv("HOME"), ".local/share/args/lib")
-	dbPath   = filepath.Join(basePath, "arsg.db")
+	DB       *sql.DB
+	env      = os.Getenv("GO_ENV")
+	basePath string
+	dbPath   string
 )
+
+func init() {
+	setPaths(env)
+}
+
+func setPaths(environment string) {
+	switch environment {
+	case "dev":
+		basePath = filepath.Join(os.Getenv("PWD"), "dev-workspace/lib/")
+
+	case "prod":
+		basePath = filepath.Join(os.Getenv("HOME"), ".local/share/args/lib")
+
+	default:
+		panic("Invalid GO_ENV. Must be either 'dev' or 'prod'")
+	}
+}
 
 type Rating struct {
 	ID       int     `json:"id"`
